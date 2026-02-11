@@ -1,0 +1,217 @@
+{
+  "templateKey": "recruitment",
+  "name": "Recruitment Pipeline",
+  "description": "Recruitment process from CV review to onboarding",
+  "icon": "👥",
+  "isActive": true,
+  "lists": [
+    {
+      "key": "candidates",
+      "name": "Candidates",
+      "description": "Candidate list",
+      "fieldDefinitions": [
+        {
+          "key": "candidate_name",
+          "name": "Candidate Name",
+          "type": "TEXT",
+          "order": 0,
+          "required": true
+        },
+        {
+          "key": "position",
+          "name": "Position",
+          "type": "TEXT",
+          "order": 1,
+          "required": true
+        },
+        {
+          "key": "email",
+          "name": "Email",
+          "type": "TEXT",
+          "order": 2
+        },
+        {
+          "key": "phone",
+          "name": "Phone",
+          "type": "TEXT",
+          "order": 3
+        },
+        {
+          "key": "salary_expectation",
+          "name": "Salary Expectation",
+          "type": "NUMBER",
+          "order": 4
+        },
+        {
+          "key": "source",
+          "name": "Source",
+          "type": "SELECT",
+          "order": 5,
+          "options": [
+            {
+              "value": "LinkedIn",
+              "color": "#3B82F6",
+              "order": 0
+            },
+            {
+              "value": "Referral",
+              "color": "#10B981",
+              "order": 1
+            },
+            {
+              "value": "Job Board",
+              "color": "#F59E0B",
+              "order": 2
+            },
+            {
+              "value": "Direct Apply",
+              "color": "#EF4444",
+              "order": 3
+            }
+          ]
+        },
+        {
+          "key": "rating",
+          "name": "Rating",
+          "type": "SELECT",
+          "order": 6,
+          "options": [
+            {
+              "value": "⭐⭐⭐⭐⭐",
+              "color": "#3B82F6",
+              "order": 0
+            },
+            {
+              "value": "⭐⭐⭐⭐",
+              "color": "#10B981",
+              "order": 1
+            },
+            {
+              "value": "⭐⭐⭐",
+              "color": "#F59E0B",
+              "order": 2
+            },
+            {
+              "value": "⭐⭐",
+              "color": "#EF4444",
+              "order": 3
+            },
+            {
+              "value": "⭐",
+              "color": "#8B5CF6",
+              "order": 4
+            }
+          ]
+        },
+        {
+          "key": "resume",
+          "name": "Resume",
+          "type": "FILE",
+          "order": 7
+        },
+        {
+          "key": "interview_date",
+          "name": "Interview Date",
+          "type": "DATE_TIME",
+          "order": 8
+        }
+      ],
+      "stages": [
+        {
+          "key": "cv_review",
+          "name": "CV Review",
+          "color": "#3b82f6",
+          "order": 0,
+          "items": [
+            {
+              "key": "john_doe_frontend_developer",
+              "name": "John Doe - Frontend Developer",
+              "order": 0,
+              "customFields": [
+                {
+                  "fieldKey": "position",
+                  "value": "Frontend Developer"
+                },
+                {
+                  "fieldKey": "source",
+                  "value": "LinkedIn"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "phone_screen",
+          "name": "Phone Screen",
+          "color": "#10b981",
+          "order": 1,
+          "items": []
+        },
+        {
+          "key": "technical_interview",
+          "name": "Technical Interview",
+          "color": "#f59e0b",
+          "order": 2,
+          "items": [
+            {
+              "key": "jane_smith_backend_developer",
+              "name": "Jane Smith - Backend Developer",
+              "order": 1,
+              "customFields": [
+                {
+                  "fieldKey": "position",
+                  "value": "Backend Developer"
+                },
+                {
+                  "fieldKey": "rating",
+                  "value": "⭐⭐⭐⭐"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "final_interview",
+          "name": "Final Interview",
+          "color": "#ef4444",
+          "order": 3,
+          "items": []
+        },
+        {
+          "key": "offer",
+          "name": "Offer",
+          "color": "#8b5cf6",
+          "order": 4,
+          "items": []
+        },
+        {
+          "key": "hired",
+          "name": "Hired",
+          "color": "#ec4899",
+          "order": 5,
+          "items": []
+        },
+        {
+          "key": "rejected",
+          "name": "Rejected",
+          "color": "#06b6d4",
+          "order": 6,
+          "items": []
+        }
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "key": "interview_guide",
+      "title": "Interview Guide",
+      "content": "# Interview Guide\n\n## Technical Questions\n\n## Behavioral Questions\n\n## Evaluation Criteria",
+      "description": "Interview guide for HR and Hiring Managers"
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "author": "AI Template Generator",
+    "createdAt": "2026-02-10"
+  }
+}

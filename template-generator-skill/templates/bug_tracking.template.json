@@ -1,0 +1,612 @@
+{
+  "templateKey": "bug_tracking_system",
+  "name": "Bug Tracking System",
+  "description": "Comprehensive bug tracking system for software development teams to report, track, and resolve bugs efficiently",
+  "icon": "🐛",
+  "isActive": true,
+  "lists": [
+    {
+      "key": "bug_reports",
+      "name": "Bug Reports",
+      "description": "Track and manage software bugs from discovery to resolution",
+      "fieldDefinitions": [
+        {
+          "key": "bug_title",
+          "name": "Bug Title",
+          "type": "TEXT",
+          "order": 0,
+          "required": true
+        },
+        {
+          "key": "description",
+          "name": "Bug Description",
+          "type": "TEXTAREA",
+          "order": 1,
+          "required": true
+        },
+        {
+          "key": "severity",
+          "name": "Severity",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "Critical",
+              "color": "#DC2626",
+              "order": 0
+            },
+            {
+              "value": "High",
+              "color": "#EF4444",
+              "order": 1
+            },
+            {
+              "value": "Medium",
+              "color": "#F59E0B",
+              "order": 2
+            },
+            {
+              "value": "Low",
+              "color": "#10B981",
+              "order": 3
+            }
+          ],
+          "order": 2,
+          "required": true
+        },
+        {
+          "key": "priority",
+          "name": "Priority",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "P0 - Urgent",
+              "color": "#DC2626",
+              "order": 0
+            },
+            {
+              "value": "P1 - High",
+              "color": "#EF4444",
+              "order": 1
+            },
+            {
+              "value": "P2 - Normal",
+              "color": "#F59E0B",
+              "order": 2
+            },
+            {
+              "value": "P3 - Low",
+              "color": "#10B981",
+              "order": 3
+            }
+          ],
+          "order": 3,
+          "required": true
+        },
+        {
+          "key": "bug_type",
+          "name": "Bug Type",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "Functional",
+              "color": "#3B82F6",
+              "order": 0
+            },
+            {
+              "value": "UI/UX",
+              "color": "#8B5CF6",
+              "order": 1
+            },
+            {
+              "value": "Performance",
+              "color": "#F59E0B",
+              "order": 2
+            },
+            {
+              "value": "Security",
+              "color": "#DC2626",
+              "order": 3
+            },
+            {
+              "value": "Integration",
+              "color": "#EC4899",
+              "order": 4
+            },
+            {
+              "value": "Data",
+              "color": "#10B981",
+              "order": 5
+            }
+          ],
+          "order": 4,
+          "required": true
+        },
+        {
+          "key": "environment",
+          "name": "Environment",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "Production",
+              "color": "#DC2626",
+              "order": 0
+            },
+            {
+              "value": "Staging",
+              "color": "#F59E0B",
+              "order": 1
+            },
+            {
+              "value": "Development",
+              "color": "#10B981",
+              "order": 2
+            },
+            {
+              "value": "Testing",
+              "color": "#3B82F6",
+              "order": 3
+            }
+          ],
+          "order": 5,
+          "required": true
+        },
+        {
+          "key": "reporter",
+          "name": "Reporter",
+          "type": "USER",
+          "order": 6,
+          "required": true
+        },
+        {
+          "key": "assignee",
+          "name": "Assignee",
+          "type": "ASSIGNEE",
+          "order": 7
+        },
+        {
+          "key": "component",
+          "name": "Component/Module",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "Frontend",
+              "color": "#3B82F6",
+              "order": 0
+            },
+            {
+              "value": "Backend",
+              "color": "#10B981",
+              "order": 1
+            },
+            {
+              "value": "Database",
+              "color": "#8B5CF6",
+              "order": 2
+            },
+            {
+              "value": "API",
+              "color": "#F59E0B",
+              "order": 3
+            },
+            {
+              "value": "Mobile",
+              "color": "#EC4899",
+              "order": 4
+            },
+            {
+              "value": "Infrastructure",
+              "color": "#6B7280",
+              "order": 5
+            }
+          ],
+          "order": 8
+        },
+        {
+          "key": "version",
+          "name": "Version Found",
+          "type": "TEXT",
+          "order": 9
+        },
+        {
+          "key": "browser",
+          "name": "Browser",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "Chrome",
+              "color": "#10B981",
+              "order": 0
+            },
+            {
+              "value": "Firefox",
+              "color": "#F59E0B",
+              "order": 1
+            },
+            {
+              "value": "Safari",
+              "color": "#3B82F6",
+              "order": 2
+            },
+            {
+              "value": "Edge",
+              "color": "#8B5CF6",
+              "order": 3
+            },
+            {
+              "value": "Mobile Browser",
+              "color": "#EC4899",
+              "order": 4
+            },
+            {
+              "value": "N/A",
+              "color": "#6B7280",
+              "order": 5
+            }
+          ],
+          "order": 10
+        },
+        {
+          "key": "steps_to_reproduce",
+          "name": "Steps to Reproduce",
+          "type": "TEXTAREA",
+          "order": 11,
+          "required": true
+        },
+        {
+          "key": "expected_result",
+          "name": "Expected Result",
+          "type": "TEXTAREA",
+          "order": 12
+        },
+        {
+          "key": "actual_result",
+          "name": "Actual Result",
+          "type": "TEXTAREA",
+          "order": 13,
+          "required": true
+        },
+        {
+          "key": "attachments",
+          "name": "Attachments",
+          "type": "FILE_MULTIPLE",
+          "order": 14
+        },
+        {
+          "key": "tags",
+          "name": "Tags",
+          "type": "MULTI_SELECT",
+          "options": [
+            {
+              "value": "regression",
+              "color": "#DC2626",
+              "order": 0
+            },
+            {
+              "value": "blocker",
+              "color": "#EF4444",
+              "order": 1
+            },
+            {
+              "value": "enhancement",
+              "color": "#10B981",
+              "order": 2
+            },
+            {
+              "value": "duplicate",
+              "color": "#6B7280",
+              "order": 3
+            },
+            {
+              "value": "wontfix",
+              "color": "#9CA3AF",
+              "order": 4
+            },
+            {
+              "value": "customer-reported",
+              "color": "#EC4899",
+              "order": 5
+            }
+          ],
+          "order": 15
+        },
+        {
+          "key": "due_date",
+          "name": "Target Fix Date",
+          "type": "DATE",
+          "order": 16
+        },
+        {
+          "key": "estimated_effort",
+          "name": "Estimated Effort (hours)",
+          "type": "NUMBER",
+          "order": 17
+        },
+        {
+          "key": "resolution_notes",
+          "name": "Resolution Notes",
+          "type": "TEXTAREA",
+          "order": 18
+        }
+      ],
+      "stages": [
+        {
+          "key": "open",
+          "name": "Open",
+          "color": "#EF4444",
+          "order": 0,
+          "items": [
+            {
+              "key": "login_page_crash",
+              "name": "Login page crashes on Safari",
+              "description": "The login page crashes when users try to log in using Safari browser",
+              "order": 0,
+              "customFields": [
+                {
+                  "fieldKey": "severity",
+                  "value": "High"
+                },
+                {
+                  "fieldKey": "priority",
+                  "value": "P1 - High"
+                },
+                {
+                  "fieldKey": "bug_type",
+                  "value": "Functional"
+                },
+                {
+                  "fieldKey": "environment",
+                  "value": "Production"
+                },
+                {
+                  "fieldKey": "component",
+                  "value": "Frontend"
+                },
+                {
+                  "fieldKey": "browser",
+                  "value": "Safari"
+                },
+                {
+                  "fieldKey": "steps_to_reproduce",
+                  "value": "1. Open Safari browser\n2. Navigate to login page\n3. Enter valid credentials\n4. Click Login button"
+                },
+                {
+                  "fieldKey": "expected_result",
+                  "value": "User should be redirected to dashboard"
+                },
+                {
+                  "fieldKey": "actual_result",
+                  "value": "Page crashes with error message"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "triaged",
+          "name": "Triaged",
+          "color": "#F59E0B",
+          "order": 1,
+          "items": [
+            {
+              "key": "slow_database_query",
+              "name": "Database query timeout on reports page",
+              "description": "Users experience timeout when generating large reports",
+              "order": 1,
+              "customFields": [
+                {
+                  "fieldKey": "severity",
+                  "value": "Medium"
+                },
+                {
+                  "fieldKey": "priority",
+                  "value": "P2 - Normal"
+                },
+                {
+                  "fieldKey": "bug_type",
+                  "value": "Performance"
+                },
+                {
+                  "fieldKey": "environment",
+                  "value": "Production"
+                },
+                {
+                  "fieldKey": "component",
+                  "value": "Database"
+                },
+                {
+                  "fieldKey": "estimated_effort",
+                  "value": 16
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "assigned",
+          "name": "Assigned",
+          "color": "#3B82F6",
+          "order": 2,
+          "items": [
+            {
+              "key": "ui_alignment_issue",
+              "name": "Button alignment issue on mobile",
+              "description": "Submit button is misaligned on mobile devices",
+              "order": 2,
+              "customFields": [
+                {
+                  "fieldKey": "severity",
+                  "value": "Low"
+                },
+                {
+                  "fieldKey": "priority",
+                  "value": "P3 - Low"
+                },
+                {
+                  "fieldKey": "bug_type",
+                  "value": "UI/UX"
+                },
+                {
+                  "fieldKey": "environment",
+                  "value": "Production"
+                },
+                {
+                  "fieldKey": "component",
+                  "value": "Mobile"
+                },
+                {
+                  "fieldKey": "estimated_effort",
+                  "value": 4
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "in_progress",
+          "name": "In Progress",
+          "color": "#8B5CF6",
+          "order": 3,
+          "items": [
+            {
+              "key": "api_security_vulnerability",
+              "name": "API endpoint allows unauthorized access",
+              "description": "Critical security vulnerability in user management API",
+              "order": 3,
+              "customFields": [
+                {
+                  "fieldKey": "severity",
+                  "value": "Critical"
+                },
+                {
+                  "fieldKey": "priority",
+                  "value": "P0 - Urgent"
+                },
+                {
+                  "fieldKey": "bug_type",
+                  "value": "Security"
+                },
+                {
+                  "fieldKey": "environment",
+                  "value": "Production"
+                },
+                {
+                  "fieldKey": "component",
+                  "value": "API"
+                },
+                {
+                  "fieldKey": "tags",
+                  "value": [
+                    "blocker",
+                    "customer-reported"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "needs_testing",
+          "name": "Needs Testing",
+          "color": "#F59E0B",
+          "order": 4,
+          "items": []
+        },
+        {
+          "key": "testing",
+          "name": "Testing",
+          "color": "#EC4899",
+          "order": 5,
+          "items": [
+            {
+              "key": "email_notification_bug",
+              "name": "Email notifications not working",
+              "description": "Users are not receiving email notifications for important events",
+              "order": 4,
+              "customFields": [
+                {
+                  "fieldKey": "severity",
+                  "value": "Medium"
+                },
+                {
+                  "fieldKey": "priority",
+                  "value": "P2 - Normal"
+                },
+                {
+                  "fieldKey": "bug_type",
+                  "value": "Integration"
+                },
+                {
+                  "fieldKey": "environment",
+                  "value": "Production"
+                },
+                {
+                  "fieldKey": "component",
+                  "value": "Backend"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "resolved",
+          "name": "Resolved",
+          "color": "#10B981",
+          "order": 6,
+          "items": []
+        },
+        {
+          "key": "closed",
+          "name": "Closed",
+          "color": "#6B7280",
+          "order": 7,
+          "items": []
+        },
+        {
+          "key": "rejected",
+          "name": "Rejected",
+          "color": "#9CA3AF",
+          "order": 8,
+          "items": []
+        }
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "key": "bug_report_template",
+      "title": "Bug Report Template",
+      "description": "Standard template for reporting bugs",
+      "content": "# Bug Report\n\n## Summary\n**Brief description of the bug**\n\n## Environment\n- **OS:** [Windows/Mac/Linux]\n- **Browser:** [Chrome/Firefox/Safari/Edge]\n- **Version:** [App version]\n- **Device:** [Desktop/Mobile/Tablet]\n\n## Steps to Reproduce\n1. Step 1\n2. Step 2\n3. Step 3\n\n## Expected Behavior\nDescribe what you expected to happen\n\n## Actual Behavior\nDescribe what actually happened\n\n## Screenshots/Videos\n[Attach any relevant screenshots or videos]\n\n## Additional Information\n- Error messages (if any)\n- Console logs\n- Network requests\n- Any other relevant details\n\n## Impact\n- **Severity:** [Critical/High/Medium/Low]\n- **Priority:** [P0-Urgent/P1-High/P2-Normal/P3-Low]\n- **Users affected:** [Number/percentage of users]\n\n## Workaround\nDescribe any temporary workaround (if available)"
+    },
+    {
+      "key": "bug_triage_guide",
+      "title": "Bug Triage Guidelines",
+      "description": "Guidelines for triaging and prioritizing bugs",
+      "content": "# Bug Triage Guidelines\n\n## Severity Levels\n\n### Critical\n- System crashes or data loss\n- Security vulnerabilities\n- Complete feature breakdown\n- Affects all users\n\n### High\n- Major feature not working\n- Significant performance issues\n- Affects many users\n- No reasonable workaround\n\n### Medium\n- Minor feature issues\n- Cosmetic problems with functional impact\n- Affects some users\n- Workaround available\n\n### Low\n- Cosmetic issues\n- Minor inconveniences\n- Enhancement requests\n- Affects few users\n\n## Priority Levels\n\n### P0 - Urgent\n- Fix immediately\n- Production is down\n- Security breach\n\n### P1 - High\n- Fix within 24-48 hours\n- Major functionality broken\n- Many users affected\n\n### P2 - Normal\n- Fix within current sprint\n- Standard bug fixes\n- Moderate user impact\n\n### P3 - Low\n- Fix when convenient\n- Nice-to-have fixes\n- Minor improvements\n\n## Triage Process\n\n1. **Initial Review**\n   - Verify bug reproduction\n   - Check for duplicates\n   - Assign severity and priority\n\n2. **Assignment**\n   - Assign to appropriate team member\n   - Set target fix date\n   - Add relevant labels/tags\n\n3. **Tracking**\n   - Update progress regularly\n   - Communicate with stakeholders\n   - Document resolution\n\n## Bug States\n\n- **Open:** Newly reported, needs review\n- **Triaged:** Reviewed and prioritized\n- **Assigned:** Assigned to developer\n- **In Progress:** Being actively worked on\n- **Needs Testing:** Fix ready for testing\n- **Testing:** Being tested by QA\n- **Resolved:** Fixed and tested\n- **Closed:** Confirmed working in production\n- **Rejected:** Not a bug or won't fix"
+    },
+    {
+      "key": "testing_checklist",
+      "title": "Bug Testing Checklist",
+      "description": "Checklist for testing bug fixes",
+      "content": "# Bug Testing Checklist\n\n## Pre-Testing\n- [ ] Review original bug report\n- [ ] Understand expected vs actual behavior\n- [ ] Prepare test environment\n- [ ] Gather necessary test data\n\n## Functional Testing\n- [ ] Verify bug is fixed in reported scenario\n- [ ] Test related functionality\n- [ ] Test edge cases\n- [ ] Verify fix works across different browsers\n- [ ] Test on different devices/screen sizes\n\n## Regression Testing\n- [ ] Verify fix doesn't break existing functionality\n- [ ] Run relevant automated test suites\n- [ ] Test integration points\n- [ ] Check performance impact\n\n## User Acceptance\n- [ ] Test from user perspective\n- [ ] Verify user workflow is not disrupted\n- [ ] Check accessibility compliance\n- [ ] Validate error handling\n\n## Documentation\n- [ ] Update test cases if needed\n- [ ] Document test results\n- [ ] Update user documentation\n- [ ] Note any new test scenarios\n\n## Sign-off\n- [ ] QA approval\n- [ ] Product owner approval (if needed)\n- [ ] Ready for deployment\n\n## Post-Deployment\n- [ ] Monitor production metrics\n- [ ] Watch for related issues\n- [ ] Collect user feedback\n- [ ] Close bug ticket"
+    },
+    {
+      "key": "root_cause_analysis",
+      "title": "Root Cause Analysis Template",
+      "description": "Template for conducting root cause analysis of critical bugs",
+      "content": "# Root Cause Analysis\n\n## Incident Summary\n- **Bug ID:** [Bug ticket number]\n- **Date Occurred:** [Date]\n- **Duration:** [How long the issue persisted]\n- **Severity:** [Critical/High/Medium/Low]\n- **Impact:** [Description of impact]\n\n## Timeline\n| Time | Event | Action Taken |\n|------|--------|-------------|\n| [Time] | Issue detected | [Action] |\n| [Time] | Investigation started | [Action] |\n| [Time] | Root cause identified | [Action] |\n| [Time] | Fix implemented | [Action] |\n| [Time] | Issue resolved | [Action] |\n\n## Root Cause Analysis\n\n### What Happened?\n[Detailed description of the incident]\n\n### Why Did It Happen?\n[Analysis using 5 Whys or Fishbone diagram]\n\n1. **Why 1:** [First level cause]\n2. **Why 2:** [Second level cause]\n3. **Why 3:** [Third level cause]\n4. **Why 4:** [Fourth level cause]\n5. **Why 5:** [Root cause]\n\n### Contributing Factors\n- [Factor 1]\n- [Factor 2]\n- [Factor 3]\n\n## Fix Implementation\n- **Solution:** [Description of the fix]\n- **Code Changes:** [Summary of code changes]\n- **Testing:** [Testing approach used]\n- **Deployment:** [Deployment process]\n\n## Prevention Measures\n\n### Immediate Actions\n- [ ] [Action 1]\n- [ ] [Action 2]\n\n### Long-term Improvements\n- [ ] [Improvement 1]\n- [ ] [Improvement 2]\n- [ ] [Improvement 3]\n\n## Lessons Learned\n- [Lesson 1]\n- [Lesson 2]\n- [Lesson 3]\n\n## Follow-up Actions\n| Action | Owner | Due Date | Status |\n|--------|--------|-----------|--------|\n| [Action] | [Name] | [Date] | [Status] |\n\n---\n\n**Prepared by:** [Name]\n**Date:** [Date]\n**Reviewed by:** [Name]"
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "author": "AI Template Generator",
+    "createdAt": "2026-02-10",
+    "tags": [
+      "bug-tracking",
+      "quality-assurance",
+      "software-development",
+      "issue-management"
+    ],
+    "category": "Quality Assurance"
+  }
+}

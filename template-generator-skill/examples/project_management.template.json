@@ -1,0 +1,200 @@
+{
+    "templateKey": "project_management",
+    "name": "Project Management",
+    "description": "Project management with stages from planning to completion",
+    "icon": "📋",
+    "isActive": true,
+    "lists": [
+        {
+            "key": "project_tasks",
+            "name": "Project Tasks",
+            "description": "Project task list",
+            "fieldDefinitions": [
+                {
+                    "key": "task_name",
+                    "name": "Task Name",
+                    "type": "TEXT",
+                    "order": 0,
+                    "required": true
+                },
+                {
+                    "key": "description",
+                    "name": "Description",
+                    "type": "TEXTAREA",
+                    "order": 1
+                },
+                {
+                    "key": "priority",
+                    "name": "Priority",
+                    "type": "SELECT",
+                    "options": [
+                        {
+                            "value": "High",
+                            "color": "#EF4444",
+                            "order": 0
+                        },
+                        {
+                            "value": "Medium",
+                            "color": "#F59E0B",
+                            "order": 1
+                        },
+                        {
+                            "value": "Low",
+                            "color": "#10B981",
+                            "order": 2
+                        }
+                    ],
+                    "order": 2,
+                    "required": true
+                },
+                {
+                    "key": "assignee",
+                    "name": "Assignee",
+                    "type": "ASSIGNEE",
+                    "order": 3
+                },
+                {
+                    "key": "deadline",
+                    "name": "Deadline",
+                    "type": "DEADLINE",
+                    "order": 4
+                },
+                {
+                    "key": "estimated_hours",
+                    "name": "Estimated Hours",
+                    "type": "NUMBER",
+                    "order": 5
+                }
+            ],
+            "stages": [
+                {
+                    "key": "backlog",
+                    "name": "Backlog",
+                    "color": "#6B7280",
+                    "order": 0,
+                    "items": [
+                        {
+                            "key": "define_project_scope",
+                            "name": "Define project scope",
+                            "description": "Define project scope and objectives",
+                            "order": 0,
+                            "customFields": [
+                                {
+                                    "fieldKey": "priority",
+                                    "value": "High"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "create_project_timeline",
+                            "name": "Create project timeline",
+                            "description": "Create timeline and milestones for the project",
+                            "order": 1,
+                            "customFields": [
+                                {
+                                    "fieldKey": "priority",
+                                    "value": "High"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "key": "to_do",
+                    "name": "To Do",
+                    "color": "#3B82F6",
+                    "order": 1,
+                    "items": [
+                        {
+                            "key": "assign_team_members",
+                            "name": "Assign team members",
+                            "description": "Assign personnel to each task",
+                            "order": 0,
+                            "customFields": [
+                                {
+                                    "fieldKey": "priority",
+                                    "value": "Medium"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "setup_development_environment",
+                            "name": "Setup development environment",
+                            "description": "Setup development environment and tools",
+                            "order": 1,
+                            "customFields": [
+                                {
+                                    "fieldKey": "priority",
+                                    "value": "High"
+                                },
+                                {
+                                    "fieldKey": "estimated_hours",
+                                    "value": 8
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "key": "in_progress",
+                    "name": "In Progress",
+                    "color": "#F59E0B",
+                    "order": 2,
+                    "items": [
+                        {
+                            "key": "weekly_status_meeting",
+                            "name": "Weekly status meeting",
+                            "description": "Weekly progress report meeting",
+                            "order": 0,
+                            "customFields": [
+                                {
+                                    "fieldKey": "priority",
+                                    "value": "Medium"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "key": "review",
+                    "name": "Review",
+                    "color": "#8B5CF6",
+                    "order": 3,
+                    "items": []
+                },
+                {
+                    "key": "done",
+                    "name": "Done",
+                    "color": "#10B981",
+                    "order": 4,
+                    "items": []
+                }
+            ]
+        }
+    ],
+    "documents": [
+        {
+            "key": "project_charter",
+            "title": "Project Charter",
+            "description": "Project initialization document",
+            "content": "# Project Charter\n\n## 1. Project Objectives\n\nDescribe main project objectives...\n\n## 2. Scope\n\n### In Scope\n- Item 1\n- Item 2\n\n### Out of Scope\n- Item 1\n- Item 2\n\n## 3. Stakeholders\n\n| Name | Role | Responsibility |\n|-----|---------|-------------|\n| ... | ... | ... |\n\n## 4. Timeline\n\n- Phase 1: ...\n- Phase 2: ...\n- Phase 3: ...\n\n## 5. Budget\n\nTotal budget: ...\n\n## 6. Risks\n\n| Risk | Probability | Impact | Mitigation |\n|------|------------|--------|------------|\n| ... | ... | ... | ... |"
+        },
+        {
+            "key": "meeting_notes_template",
+            "title": "Meeting Notes Template",
+            "description": "Meeting notes template",
+            "content": "# Meeting Notes\n\n**Date:** [Date]\n**Attendees:** [Names]\n**Facilitator:** [Name]\n\n## Agenda\n\n1. ...\n2. ...\n\n## Discussion\n\n### Topic 1\n\n### Topic 2\n\n## Action Items\n\n| Action | Owner | Due Date |\n|--------|-------|----------|\n| ... | ... | ... |\n\n## Next Meeting\n\n**Date:** [Date]\n**Topics:** ..."
+        }
+    ],
+    "metadata": {
+        "version": "1.0.0",
+        "author": "AI Template Generator",
+        "createdAt": "2026-02-10",
+        "tags": [
+            "project",
+            "management",
+            "tasks"
+        ],
+        "category": "Project Management"
+    }
+}
