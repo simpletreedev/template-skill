@@ -93,19 +93,80 @@ class SimpleZip {
     if (!this._crc32Table) {
       this._crc32Table = [];
       for (let i = 0; i < 256; i++) {
-        let c = i;
+        let crc = i;
         for (let j = 0; j < 8; j++) {
-          c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+          crc = crc & 1 ? (crc >>> 1) ^ 0xedb88320 : crc >>> 1;
         }
-        this._crc32Table[i] = c;
+        this._crc32Table[i] = crc;
       }
     }
 
     let crc = 0xffffffff;
     for (let i = 0; i < buffer.length; i++) {
-      crc = this._crc32Table[(crc ^ buffer[i]) & 0xff] ^ (crc >>> 8);
+      crc = (crc >>> 8) ^ this._crc32Table[(crc ^ buffer[i]) & 0xff];
     }
     return (crc ^ 0xffffffff) >>> 0;
+  }
+}
+
+// ==================== File Upload ====================
+
+async function uploadZipToService(zipPath) {
+  const uploadUrl = process.env.UPLOAD_SERVICE_URL;
+  if (!uploadUrl) {
+    console.log("⚠️  No UPLOAD_SERVICE_URL found, skipping upload");
+    return null;
+  }
+
+  try {
+    const url = new URL(uploadUrl);
+    const protocol = url.protocol === "https:" ? https : http;
+
+    const fileContent = fs.readFileSync(zipPath);
+    const fileName = path.basename(zipPath);
+    const boundary = `----WebKitFormBoundary${Date.now()}`;
+
+    const header = Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${fileName}"\r\nContent-Type: application/zip\r\n\r\n`,
+    );
+    const footer = Buffer.from(`\r\n--${boundary}--\r\n`);
+    const body = Buffer.concat([header, fileContent, footer]);
+
+    return new Promise((resolve, reject) => {
+      const options = {
+        hostname: url.hostname,
+        port: url.port || (url.protocol === "https:" ? 443 : 80),
+        path: url.pathname,
+        method: "POST",
+        headers: {
+          "Content-Type": `multipart/form-data; boundary=${boundary}`,
+          "Content-Length": body.length,
+        },
+      };
+
+      const req = protocol.request(options, (res) => {
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            try {
+              const response = JSON.parse(data);
+              resolve(response.url || response.downloadUrl || null);
+            } catch {
+              resolve(null);
+            }
+          } else {
+            resolve(null);
+          }
+        });
+      });
+
+      req.on("error", () => resolve(null));
+      req.write(body);
+      req.end();
+    });
+  } catch (error) {
+    return null;
   }
 }
 
@@ -161,73 +222,9 @@ Ready to import!
 `;
 }
 
-// ==================== Upload Service ====================
+// ==================== Main Packager ====================
 
-async function uploadZipToService(zipPath) {
-  const uploadUrl = process.env.UPLOAD_SERVICE_URL;
-
-  if (!uploadUrl) {
-    return null;
-  }
-
-  try {
-    const url = new URL(uploadUrl + "/uploads");
-    const protocol = url.protocol === "https:" ? https : http;
-
-    const boundary =
-      "----WebKitFormBoundary" + Math.random().toString(36).substring(2);
-    const fileContent = fs.readFileSync(zipPath);
-    const fileName = path.basename(zipPath);
-
-    const parts = [];
-    parts.push(`--${boundary}\r\n`);
-    parts.push(
-      `Content-Disposition: form-data; name="file"; filename="${fileName}"\r\n`,
-    );
-    parts.push(`Content-Type: application/zip\r\n\r\n`);
-
-    const header = Buffer.from(parts.join(""));
-    const footer = Buffer.from(`\r\n--${boundary}--\r\n`);
-    const body = Buffer.concat([header, fileContent, footer]);
-
-    const options = {
-      hostname: url.hostname,
-      port: url.port || (url.protocol === "https:" ? 443 : 80),
-      path: url.pathname,
-      method: "POST",
-      headers: {
-        "Content-Type": `multipart/form-data; boundary=${boundary}`,
-        "Content-Length": body.length,
-      },
-    };
-
-    return new Promise((resolve, reject) => {
-      const req = protocol.request(options, (res) => {
-        let data = "";
-        res.on("data", (chunk) => (data += chunk));
-        res.on("end", () => {
-          try {
-            const result = JSON.parse(data);
-            const downloadUrl = result.url;
-            resolve(downloadUrl);
-          } catch (e) {
-            resolve(null);
-          }
-        });
-      });
-
-      req.on("error", () => resolve(null));
-      req.write(body);
-      req.end();
-    });
-  } catch (error) {
-    return null;
-  }
-}
-
-// ==================== Package Creator ====================
-
-async function createSkillPackage(template, outputPath, additionalFiles = []) {
+async function createSkillPackage(template, outputPath) {
   const templateKey = template.templateKey;
   const zipPath = outputPath || `${templateKey}.zip`;
   const jsonPath = `${templateKey}.template.json`;
@@ -244,27 +241,16 @@ async function createSkillPackage(template, outputPath, additionalFiles = []) {
   zip.addFile("template.json", templateJson);
   zip.addFile("IMPORT.md", importMd);
 
-  // Add additional files to docs/ folder if provided
-  if (additionalFiles && additionalFiles.length > 0) {
-    // Create docs/ folder and write files
-    const docsDir = "docs";
-    if (!fs.existsSync(docsDir)) {
-      fs.mkdirSync(docsDir);
-    }
-
-    additionalFiles.forEach((file) => {
-      // Write file to docs/ folder
-      const filePath = `${docsDir}/${file.filename}`;
-      if (file.buffer) {
-        // Binary file (docx, pdf, excel)
-        fs.writeFileSync(filePath, file.buffer);
-      } else {
-        // Text file (md, txt)
-        fs.writeFileSync(filePath, file.content);
+  // Add files from docs/ folder if it exists
+  const docsDir = "docs";
+  if (fs.existsSync(docsDir)) {
+    const files = fs.readdirSync(docsDir);
+    files.forEach((file) => {
+      const filePath = path.join(docsDir, file);
+      if (fs.statSync(filePath).isFile()) {
+        const content = fs.readFileSync(filePath);
+        zip.addFile(`docs/${file}`, content);
       }
-
-      // Add to ZIP with docs/ prefix
-      zip.addFile(`docs/${file.filename}`, file.buffer || file.content);
     });
   }
 
@@ -280,6 +266,17 @@ async function createSkillPackage(template, outputPath, additionalFiles = []) {
   // Get absolute paths
   const absolutePath = path.resolve(zipPath);
   const absoluteJsonPath = path.resolve(jsonPath);
+
+  // Count docs files
+  let docsCount = 0;
+  const docsList = [];
+  if (fs.existsSync(docsDir)) {
+    const files = fs.readdirSync(docsDir);
+    docsCount = files.filter((f) =>
+      fs.statSync(path.join(docsDir, f)).isFile(),
+    ).length;
+    docsList.push(...files);
+  }
 
   // Upload to service if configured
   console.log("📤 Uploading to service...");
@@ -302,11 +299,13 @@ async function createSkillPackage(template, outputPath, additionalFiles = []) {
       { path: jsonPath, size: jsonSizeKB + " KB" },
       { path: zipPath, size: fileSizeKB + " KB" },
     ],
-    additionalFilesCount: additionalFiles.length,
+    docsCount,
+    docsList,
   };
 }
 
-// Export for module use
+// ==================== Exports ====================
+
 module.exports = {
   createSkillPackage,
   generateImportMd,

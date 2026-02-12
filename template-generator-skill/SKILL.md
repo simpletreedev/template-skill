@@ -1,7 +1,7 @@
 ---
 name: template-generator
 description: Generate template.json files following Priovs data structure format for ANY industry/workflow based on user requirements
-version: 4.2.0
+version: 6.0.0
 ---
 
 # Template Generator Skill
@@ -21,8 +21,6 @@ Generates **template.json files** that follow the **Priovs standard data structu
 - User describes a workflow they want to manage
 - User asks to generate task/workflow management templates
 
-**Works for ALL industries:** Development, Business, Healthcare, Education, Real Estate, Manufacturing, Retail, Services, Creative, Events, **ANY domain!**
-
 ## What This Tool Does
 
 Creates templates specifically designed for **Priovs** - following the standard data structure of Priovs task management system.
@@ -38,22 +36,11 @@ Creates templates specifically designed for **Priovs** - following the standard 
 - Event: Event planning, Vendor management, Guest tracking
 - **ANY other workflow you can imagine!**
 
-**Examples (not limitations):**
-- Bug tracking, Recruitment, Customer support
-- Project management, Sales pipeline, Content creation
-- Inventory, Orders, Appointments
-- Custom workflows for your specific needs
-
 **NOT for creating:**
 - ❌ Web application templates
 - ❌ Document templates (PDF/Markdown)
 - ❌ Code templates
 - ❌ Templates for other systems (Jira, Trello, Asana, etc.)
-
-**IMPORTANT:**
-- All templates follow Priovs data structure standards
-- Can create templates for ANY industry/domain/workflow
-- Never ask which system the user wants to use - it's always Priovs
 
 ## The Process
 
@@ -75,43 +62,14 @@ Creates templates specifically designed for **Priovs** - following the standard 
 - Focus ONLY on understanding what the user wants to track
 
 **❌ NEVER ask about:**
-- "Bạn muốn tạo template dưới dạng file nào?" (What file type?)
-- "What format/type do you want?" (always JSON + ZIP)
-- "How should I package this?" (always ZIP with IMPORT.md)
-- Output format - it's FIXED as JSON + ZIP!
+- Output format (always JSON + ZIP)
+- File types (always creates JSON)
+- How to package (always ZIP with docs/)
 
 ### Step 2: Build Template JSON Structure
 
-**Create complete template object in memory with:**
+**Create complete template object:**
 
-1. **Basic info:**
-   - templateKey (snake_case from name)
-   - name, description, icon
-   - metadata (version, author, tags, category)
-
-2. **Lists with:**
-   - Fields (TEXT, TEXTAREA, SELECT, DATE, etc.)
-   - Stages (To Do, In Progress, Done, etc.)
-   - Empty items (no sample data)
-
-3. **Documents (in template.documents field):**
-   - Add helpful documents directly to template.documents array
-   - Each document has: `title`, `description`, `content` (markdown text)
-   - **Examples by category:**
-     - **Development**: Bug report template, testing checklist
-     - **HR/Recruitment**: Interview questions, evaluation guide
-     - **Customer Service**: Response templates, escalation procedures
-     - **Project Management**: Project guidelines, meeting notes
-     - **Sales/Business**: Sales process guide, objection handling
-     - **Generic**: Getting started guide, team guidelines
-   - **These documents are already in template.json - no need to create separate files!**
-
-**⚠️ IMPORTANT - Documents Strategy:**
-- **Markdown/Text documents**: Add to `template.documents` field (already in JSON)
-- **Binary documents (docx/excel/pdf)**: Use `additionalFiles` parameter (Step 3)
-- **Do NOT duplicate** - if content is in template.documents, don't create separate file
-
-**Example structure:**
 ```javascript
 {
   templateKey: "bug_tracking",
@@ -120,16 +78,15 @@ Creates templates specifically designed for **Priovs** - following the standard 
   icon: "🐛",
   isActive: true,
   lists: [{
-    key: "bugs",
     name: "Bugs",
     fieldDefinitions: [
-      { key: "title", name: "Title", type: "TEXT", required: true },
-      { key: "priority", name: "Priority", type: "SELECT", options: [...] }
+      { name: "Title", type: "TEXT", required: true },
+      { name: "Priority", type: "SELECT", options: [...] }
     ],
     stages: [
-      { key: "new", name: "New", color: "#EF4444", order: 0, items: [] },
-      { key: "in_progress", name: "In Progress", color: "#F59E0B", order: 1, items: [] },
-      { key: "done", name: "Done", color: "#10B981", order: 2, items: [] }
+      { name: "New", color: "#EF4444", order: 0, items: [] },
+      { name: "In Progress", color: "#F59E0B", order: 1, items: [] },
+      { "Done", color: "#10B981", order: 2, items: [] }
     ]
   }],
   documents: [
@@ -149,121 +106,122 @@ Creates templates specifically designed for **Priovs** - following the standard 
 }
 ```
 
-### Step 3: Create Package Files
+### Step 3: Generate Documentation Files (Excel/PDF/Word)
 
-**AI executes packaging internally - DO NOT read script file!**
+**After creating template.json, generate helpful documentation files:**
 
-**How to use:**
+**3.1. Read the template.json you just created:**
+```bash
+const template = JSON.parse(fs.readFileSync('[templateKey].template.json', 'utf8'));
+```
 
-AI builds the complete template JSON object in memory, then calls the packaging function:
+**3.2. Create JavaScript file(s) to generate docs:**
+
+Create `generate-docs.js` that:
+- Reads the template.json
+- Generates Excel file (.xlsx) with template data
+- Generates PDF file (.pdf) with template guide
+- Generates Word file (.docx) with template overview
+- Saves files to `docs/` folder
+
+**Example structure:**
+```javascript
+const ExcelJS = require('exceljs');
+const fs = require('fs');
+const path = require('path');
+
+const template = JSON.parse(fs.readFileSync('[templateKey].template.json', 'utf8'));
+const outputDir = path.join(__dirname, 'docs');
+
+if (!fs.existsSync(outputDir)) {
+  fs.mkdirSync(outputDir, { recursive: true });
+}
+
+async function generateDocs() {
+  // Create Excel with template data
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet('Template Overview');
+  // ... generate Excel based on template data
+
+  await workbook.xlsx.writeFile(path.join(outputDir, 'template_data.xlsx'));
+
+  // Similar for PDF and Word files
+  // ...
+
+  console.log('✅ Documentation files created');
+}
+
+generateDocs().catch(err => {
+  console.error('❌ Error:', err.message);
+  process.exit(1);
+});
+```
+
+**3.3. Execute the generator:**
+```bash
+node generate-docs.js
+```
+
+**3.4. Clean up generator file:**
+```bash
+rm generate-docs.js
+```
+
+**Documentation files to create:**
+- `template_data.xlsx` - Excel spreadsheet with fields, stages, workflow
+- `template_guide.pdf` - PDF guide with template overview
+- `template_overview.docx` - Word document with detailed information
+
+**All files should be saved in `docs/` folder.**
+
+### Step 4: Package Everything
+
+**Call the packaging function:**
 
 ```javascript
 const { createSkillPackage } = require('./scripts/template-skill-generator.js');
 
-// Basic usage - just template
 const result = await createSkillPackage(template);
-
-// With additional documents (docx, excel, pdf, etc.)
-const additionalFiles = [
-  {
-    filename: 'interview_template.docx',
-    buffer: Buffer.from(docxContent)  // Binary content for docx/pdf/excel
-  },
-  {
-    filename: 'checklist.md',
-    content: '# Checklist\n...'  // Text content for md/txt
-  }
-];
-const result = await createSkillPackage(template, null, additionalFiles);
+console.log(JSON.stringify(result, null, 2));
 ```
-
-**⚠️ IMPORTANT:**
-- **DO NOT** use Read tool to read the script file
-- **DO NOT** inspect or analyze the script code
-- **JUST CALL** the function with your template object
-- The script is already available in the skill package
-
-**Additional Files Parameter (Optional):**
-
-**ONLY use for binary documents (docx, excel, pdf) - NOT for markdown/text!**
-
-If you need to include binary documents:
-
-```javascript
-additionalFiles = [
-  {
-    filename: 'form_template.docx',  // Word document
-    buffer: Buffer.from(...)          // Binary content
-  },
-  {
-    filename: 'data_sheet.xlsx',     // Excel spreadsheet
-    buffer: Buffer.from(...)          // Binary content
-  },
-  {
-    filename: 'handbook.pdf',         // PDF document
-    buffer: Buffer.from(...)          // Binary content
-  }
-]
-```
-
-**DO NOT add markdown/text files here - they're already in template.documents!**
-
-**These files will be added to `docs/` folder in the ZIP package.**
 
 **What the script does (you don't need to know, just call it):**
 
 1. Writes `[templateKey].template.json` to current directory
-   - **Includes all documents from template.documents field**
 2. Generates `IMPORT.md` with template info and instructions
-3. Creates `docs/` folder and writes additional binary files (if provided)
-   - **ONLY for docx/excel/pdf - NOT for markdown/text**
+3. Scans `docs/` folder and includes all files found
 4. Creates ZIP file containing:
-   - `template.json` (with documents field)
+   - `template.json`
    - `IMPORT.md`
-   - `docs/` folder (only if binary files provided)
+   - `docs/` folder (with all your generated files)
 5. Uploads to service (if UPLOAD_SERVICE_URL is set)
 6. Returns result object with file paths and download URL
 
 **Important Notes:**
 - Markdown/text documents are in template.json (template.documents field)
-- Binary documents (docx/excel/pdf) go in docs/ folder
-- Don't duplicate content between template.documents and additionalFiles
-
-**Output location:** Current directory
-
-**Files created:**
-- `[templateKey].template.json` - Template data
-- `[templateKey].zip` - Package ready for import
-- `docs/` folder (if additional files provided)
+- Excel/PDF/Word files go in docs/ folder (you generate them)
+- Script automatically includes all files from docs/ in the ZIP
 
 **ZIP package structure:**
 ```
 template.zip
 ├── template.json
 ├── IMPORT.md
-└── docs/              (optional)
-    ├── document.docx
-    ├── spreadsheet.xlsx
-    ├── guide.pdf
-    └── notes.md
+└── docs/
+    ├── template_data.xlsx       (you generated this)
+    ├── template_guide.pdf        (you generated this)
+    └── template_overview.docx    (you generated this)
 ```
 
-**⚠️ CRITICAL - DO NOT CREATE:**
-- ❌ Folders OTHER THAN `docs/` (no packages/, reports/, scripts/, templates/)
-- ❌ Config files (package.json, package-lock.json, config-*.json)
-- ❌ Documentation files in root (CLAUDE.md, README.md, .env.example)
-- ❌ Any other files or directories
+**⚠️ IMPORTANT:**
+- **DO NOT** use Read tool to read the script file
+- **DO NOT** inspect or analyze the script code
+- **JUST CALL** the function with your template object
+- Script handles all packaging, upload, and file management
 
-**✅ ALLOWED TO CREATE:**
-- `[templateKey].template.json` in current directory
-- `[templateKey].zip` in current directory
-- `docs/` folder with additional documents (optional)
+### Step 5: Report Success
 
-### Step 4: Report Results to User
-
-**Provide a friendly, clear summary:**
-
-**✅ MUST include download link if available:**
+**Present results to user in friendly format:**
 
 ```
 ✅ Done! Your [Template Name] template is ready!
@@ -279,6 +237,10 @@ template.zip
 📦 The ZIP file includes:
    ✓ template.json - All your template settings
    ✓ IMPORT.md - Simple instructions to import
+   ✓ docs/ folder with helpful documents:
+     • template_data.xlsx - Excel spreadsheet with all data
+     • template_guide.pdf - PDF guide with overview
+     • template_overview.docx - Word document with details
 
 🔗 Download link:
    [SHOW THE ACTUAL DOWNLOAD URL HERE IF IT EXISTS]
@@ -286,222 +248,122 @@ template.zip
 🎯 What's next?
    1. Share this link with anyone who needs the template
    2. Or download and upload to your system
-   3. The system will read the instructions and set everything up automatically
+   3. Open the Excel file to see all fields and stages
+   4. Open the PDF guide for a printable overview
+   5. Open the Word document to review detailed information
+   6. The system will read the instructions and set everything up automatically
 
 That's it! Your template is ready to use. 🚀
 ```
 
-**Communication style:**
-- Use simple, friendly language
-- Avoid technical terms (use "settings" instead of "data structure")
-- Be encouraging and clear
-- **ALWAYS show download link if available**
-- Show practical next steps
-
 ## Template Structure Reference
 
-### Root Level
-```json
+### Required Fields
+
+```javascript
 {
-  "templateKey": "snake_case_key",
-  "name": "Display Name",
-  "description": "Description",
-  "icon": "📋",
-  "isActive": true,
-  "lists": [],
-  "documents": [],
-  "metadata": {
-    "version": "1.0.0",
-    "author": "AI Template Generator",
-    "createdAt": "YYYY-MM-DD",
-    "tags": [],
-    "category": "Category Name"
-  }
+  templateKey: "unique_snake_case_id",
+  name: "Display Name",
+  description: "Brief description",
+  icon: "📋",
+  isActive: true,
+  lists: [...],
+  documents: [...],
+  metadata: {...}
 }
 ```
 
 ### List Structure
-```json
+
+```javascript
 {
-  "key": "snake_case",
-  "name": "List Name",
-  "description": "Description",
-  "fieldDefinitions": [],
-  "stages": []
+  name: "List Name",
+  description: "Optional description",
+  fieldDefinitions: [...],
+  stages: [...]
 }
 ```
 
-### Stage Structure (CRITICAL)
-```json
+### Field Definitions
+
+```javascript
 {
-  "key": "snake_case",
-  "name": "Stage Name",
-  "color": "#HEX",
-  "order": 0,
-  "items": []  // Items INSIDE stage - no stageKey needed
+  name: "Field Display Name",
+  type: "TEXT | TEXTAREA | SELECT | DATE | NUMBER | CHECKBOX | USER",
+  required: true/false,
+  options: [...]  // For SELECT type
 }
 ```
 
-### Document Structure
-```json
+### Stages
+
+```javascript
 {
-  "title": "Document Title",
-  "description": "Brief description",
-  "content": "Markdown or plain text content..."
+  name: "Stage Name",
+  color: "#HEX_COLOR",
+  order: 0,
+  items: []  // Always empty
+}
+```
+
+### Documents (Markdown/Text only)
+
+```javascript
+{
+  title: "Document Title",
+  description: "Brief description",
+  content: "Markdown or text content here..."
 }
 ```
 
 ## Field Types
 
-| Type | Usage | Example |
-|------|-------|---------|
-| TEXT | Short text | "Task name" |
-| TEXTAREA | Long text | "Description..." |
-| NUMBER | Numeric value | 100 |
-| DATE | Date only | "2026-02-10" |
-| DATE_TIME | Date + time | "2026-02-10T10:00:00Z" |
-| SELECT | Single choice | "High" |
-| MULTI_SELECT | Multiple choices | ["tag1", "tag2"] |
-| CHECKBOX | Boolean | true/false |
-| ASSIGNEE | User assignment | user_id |
-| DEADLINE | Due date | "2026-02-15" |
-| FILE | Single file | file object |
-| FILE_MULTIPLE | Multiple files | [files] |
-| USER | User reference | user_id |
-
-## Default Inference
-
-If user doesn't specify:
-
-**Stages:**
-```javascript
-["To Do", "In Progress", "Done"]
-```
-
-**Fields:**
-```javascript
-[
-  { name: "Title", type: "TEXT", required: true },
-  { name: "Description", type: "TEXTAREA" },
-  { name: "Priority", type: "SELECT", options: [
-    { value: "High", color: "#EF4444", order: 0 },
-    { value: "Medium", color: "#F59E0B", order: 1 },
-    { value: "Low", color: "#10B981", order: 2 }
-  ]}
-]
-```
-
-**Default Colors:**
-```javascript
-["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#6B7280"]
-```
-
-## Upload Service Integration
-
-**Configuration:**
-
-Set environment variable:
-```bash
-UPLOAD_SERVICE_URL=https://your-upload-service.com
-```
-
-**How it works:**
-
-1. After creating ZIP → Uploads to service
-2. POST to `/uploads` endpoint with multipart/form-data
-3. Receives download URL in response
-4. Returns URL to AI for display to user
-
-**If not configured:**
-- ZIP saved locally only
-- No download link available
-- User uploads manually
+- **TEXT**: Single line text
+- **TEXTAREA**: Multi-line text
+- **SELECT**: Dropdown with options
+- **DATE**: Date picker
+- **NUMBER**: Numeric input
+- **CHECKBOX**: Yes/No toggle
+- **USER**: User assignment
 
 ## Common Issues
 
-### Files Not Created
+### 1. All keys must be snake_case
 
-**Symptoms:** No .template.json or .zip files in directory
-
-**Solutions:**
-- Check that `createSkillPackage()` was called with valid template
-- Verify template has required fields (templateKey, name, lists)
-- Check file write permissions in current directory
-
-### Download Link Not Shown
-
-**Symptoms:** Files created but no download link in summary
-
-**Solutions:**
-- Verify UPLOAD_SERVICE_URL is set in environment
-- Check upload service is accessible
-- Ensure service returns valid URL in response
-- **CRITICAL:** AI must display downloadUrl from result object
-
-### Invalid Template Structure
-
-**Symptoms:** Template fails validation on import
-
-**Solutions:**
-- Verify all keys are snake_case
-- Check items are nested inside stages (not separate with stageKey)
-- Ensure colors are valid hex codes (#RRGGBB)
-- Validate fieldDefinitions have required properties
-
-### Documents Not Generated
-
-**Symptoms:** documents array is empty
-
-**Solutions:**
-- Auto-generation works based on category/name detection
-- If category doesn't match presets → generic documents are added
-- Documents are always added (either specific or generic)
-
-## Integration with Development Workflow
-
-### Template Creation Flow
-
-1. User requests template
-2. AI gathers requirements (asks if needed)
-3. AI builds template JSON in memory
-4. AI calls `createSkillPackage(template)`
-5. Script creates files and uploads
-6. AI displays summary with download link
-
-### After Template Creation
-
-1. User downloads ZIP or shares link
-2. User uploads to Priovs system
-3. System reads IMPORT.md for instructions
-4. System imports template.json structure
-5. Template ready to use in Priovs
+**❌ Wrong:** `camelCase`, `PascalCase`, `kebab-case`
+**✅ Correct:** `snake_case`
 
 ## Best Practices
 
 - **Always create empty templates**: No sample items unless explicitly requested
 - **Documents in template.json**: Add markdown/text documents to template.documents field
-- **Binary files separate**: Only use additionalFiles for docx/excel/pdf
-- **Don't duplicate content**: If in template.documents, don't create separate file
+- **Generate docs files**: After template.json, create Excel/PDF/Word files in docs/
+- **Clean up generator**: Delete the generator JavaScript file after execution
 - **Show download link**: If available, display prominently in summary
 - **Use simple language**: Avoid technical jargon when communicating with user
 - **Be conversational**: Make interaction friendly and helpful
-- **Never ask about format**: Output is always JSON + ZIP
+- **Never ask about format**: Output is always JSON + ZIP with generated docs
 - **Proper structure**: Items inside stages, all keys snake_case
-- **Complete workflow**: Gather → Build → Package → Upload → Report
+- **Complete workflow**: Gather → Build → Generate Docs → Package → Upload → Report
 
 ## Success Criteria
 
-✅ Files created in current directory:
-   - `[templateKey].template.json` (always)
-   - `[templateKey].zip` (always)
-   - `docs/` folder (optional - if additional files provided)
-✅ NO folders created OTHER THAN `docs/` (no packages/, scripts/, templates/)
-✅ NO config files created (no package.json, CLAUDE.md, etc.)
-✅ JSON has valid structure (lists → stages → items)
-✅ All keys are snake_case
-✅ Colors are valid hex codes
-✅ At least 1 list, 2+ stages, 2+ fields
-✅ ZIP contains: template.json + IMPORT.md + docs/ (if provided)
+✅ Template.json created with complete structure
+✅ All keys in snake_case format
+✅ Items nested inside stages (empty arrays)
+✅ Documents added to template.documents (markdown/text)
+✅ Excel/PDF/Word files generated in docs/ folder
+✅ Generator script cleaned up (deleted)
+✅ ZIP contains: template.json + IMPORT.md + docs/ (with generated files)
 ✅ User receives complete summary with file paths and download link
-✅ Documents auto-generated based on category
-✅ Additional files (docx/excel/pdf) in docs/ folder if AI generated them
+✅ Clear, helpful communication throughout
+
+## Files Created
+
+- `[templateKey].template.json` - Template data
+- `[templateKey].zip` - Package ready for import
+- `docs/` folder (created by you):
+  - `template_data.xlsx` - Excel spreadsheet
+  - `template_guide.pdf` - PDF guide
+  - `template_overview.docx` - Word document
+- `generate-docs.js` (temporary - delete after use)
