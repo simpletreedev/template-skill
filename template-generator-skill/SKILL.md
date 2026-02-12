@@ -1,186 +1,269 @@
 ---
-name: template-json-generator
-description: Generate workflow/task tracking template.json files and package as ZIP. Takes workflow requirements, generates proper JSON structure, and outputs both JSON file and ZIP package ready for import into task management systems.
-license: MIT
-version: 3.3.0
+name: template-generator
+description: Generate template.json files following Priovs data structure format for ANY industry/workflow based on user requirements
+version: 4.2.0
 ---
 
-# Template JSON Generator Skill
+# Template Generator Skill
 
-Generate **task tracking / workflow management templates** from user requirements.
+## Overview
+
+Generates **template.json files** that follow the **Priovs standard data structure** for tracking workflows/tasks in ANY industry or domain.
+
+**This skill creates templates based on user requirements - no industry limitations!**
+
+**Announce at start:** "I'm using the template-generator skill to create your template."
+
+## When to Use
+
+- User wants to create a template for tracking ANY type of workflow/tasks
+- User needs to organize and track items/processes in their work
+- User describes a workflow they want to manage
+- User asks to generate task/workflow management templates
+
+**Works for ALL industries:** Development, Business, Healthcare, Education, Real Estate, Manufacturing, Retail, Services, Creative, Events, **ANY domain!**
 
 ## What This Tool Does
 
-**This tool creates templates for TASK MANAGEMENT / WORKFLOW TRACKING systems.**
+Creates templates specifically designed for **Priovs** - following the standard data structure of Priovs task management system.
 
-Examples of what to create:
-- Bug tracking templates
-- Recruitment pipeline templates
-- Customer support ticket templates
-- Project task templates
-- Sales pipeline templates
+**Can create templates for ANY workflow:**
+- Business: Sales, Marketing, Operations, Finance, HR
+- Development: Bug tracking, Feature requests, Sprints, Code reviews
+- Service: Customer support, Helpdesk, Ticketing, Service requests
+- Creative: Content pipeline, Design projects, Video production
+- Education: Course management, Student tracking, Assignment workflows
+- Healthcare: Patient tracking, Appointment scheduling, Treatment plans
+- Real estate: Property listings, Client management, Deal pipeline
+- Event: Event planning, Vendor management, Guest tracking
+- **ANY other workflow you can imagine!**
+
+**Examples (not limitations):**
+- Bug tracking, Recruitment, Customer support
+- Project management, Sales pipeline, Content creation
+- Inventory, Orders, Appointments
+- Custom workflows for your specific needs
 
 **NOT for creating:**
 - ❌ Web application templates
 - ❌ Document templates (PDF/Markdown)
 - ❌ Code templates
-- ❌ Google Docs/Notion templates
+- ❌ Templates for other systems (Jira, Trello, Asana, etc.)
 
-## Output Format (FIXED - DO NOT ASK)
+**IMPORTANT:**
+- All templates follow Priovs data structure standards
+- Can create templates for ANY industry/domain/workflow
+- Never ask which system the user wants to use - it's always Priovs
 
-**The output format is ALWAYS:**
-1. **JSON file**: `template.json` with task tracking structure
-2. **ZIP package**: Contains template.json + IMPORT.md
+## The Process
 
-**NEVER ask about format/type/structure - it's always JSON + ZIP!**
+### Step 1: Understand User Requirements
 
-## ⚠️ CRITICAL: Output Files Only
+**Ask ONLY about template DATA - NEVER about output format!**
 
-**CREATE EXACTLY 2 FILES IN CURRENT DIRECTORY:**
-1. `[templateKey].template.json` - Template data
-2. `[templateKey].zip` - Package with template.json + IMPORT.md
+**✅ What to ask if unclear:**
 
-**ABSOLUTELY DO NOT CREATE:**
-- ❌ Folders (docs/, packages/, reports/, scripts/, templates/)
-- ❌ Config files (package.json, package-lock.json, config-*.json)
-- ❌ Documentation files (CLAUDE.md, README.md, .env.example)
-- ❌ Any other files or directories
-
-**Tools/scripts are already included in the skill package!**
-
-## When to Use
-
-- User wants to create a workflow/task tracking template
-- User describes a process that needs tracking (e.g., "I need to track bugs", "manage recruitment")
-- User mentions templates for: tracking, workflows, tasks, processes, pipelines
-
-## Execution Mode: SMART & FRIENDLY
-
-**Be smart, friendly, and practical. Understand user needs without confusing them.**
-
-### When to Ask Questions
-
-Ask in a friendly way if these details are unclear:
-
-1. **What to track** (if just "create template")
+1. **What to track** (if purpose unclear)
    - "What would you like to track? For example: bugs, customer requests, job candidates?"
 
 2. **Workflow steps** (if stages unclear)
    - "What are the main steps in your workflow? Like: New → In Progress → Done?"
 
-3. **Sample data preference** (ALWAYS ask for clarity)
-   - "Would you like me to add some example items to see how it works, or just create an empty template?"
-
-**Important Notes:**
+**Important:**
 - Use simple language, avoid technical jargon
 - Be conversational and helpful
-- Don't make assumptions about sample data
+- Focus ONLY on understanding what the user wants to track
 
-**NEVER ask:**
-- ❌ "What format/type?" (always JSON + ZIP)
-- ❌ Technical questions about JSON structure
-- ❌ Questions about file locations or packaging
+**❌ NEVER ask about:**
+- "Bạn muốn tạo template dưới dạng file nào?" (What file type?)
+- "What format/type do you want?" (always JSON + ZIP)
+- "How should I package this?" (always ZIP with IMPORT.md)
+- Output format - it's FIXED as JSON + ZIP!
 
-### Sample Items Policy
+### Step 2: Build Template JSON Structure
 
-**CRITICAL: Do NOT create fake/dummy data!**
+**Create complete template object in memory with:**
 
-When generating sample items:
-- ✅ **If user wants examples**: Create 1-2 generic items with placeholder names
-  - Use neutral names: "Sample Task 1", "Example Item"
-  - Use generic descriptions: "Description here"
-- ❌ **NEVER create realistic fake data**:
-  - Don't invent people's names (e.g., "John Doe", "Alice")
-  - Don't make up real-sounding companies, projects, or details
-  - Don't create fake bug reports, customer names, candidate info
-
-**Default behavior**: Create empty template (no items) unless user explicitly asks for examples.
-
-### When to Auto-Generate
-
-Generate immediately if:
-- User request is clear (e.g., "bug tracking", "customer support")
-- Can infer reasonable workflow steps
-- Can use standard fields (name, description, status)
-
-**Auto-generate with empty stages** (no sample items) for:
-- "Create bug tracking template"
-- "I need to track customer support tickets"
-- "Track recruitment pipeline"
-
-Only add sample items if user specifically asks or confirms they want examples.
-
-## Required Output Format
-
-**MUST output both files:**
-
-1. **JSON file**: Write `template.json` to disk
-2. **ZIP package**: Create ZIP containing:
-   - `template.json` - Full template data
-   - `IMPORT.md` - Import instructions
-   - `.env.example` - Environment variables
-
-## Execution Workflow
-
-### Phase 1: Gather Information
-
-1. **Parse user request** - Extract template name, purpose, stages, fields
-2. **Check completeness** - Is information sufficient?
-3. **Ask if needed** - If critical info missing, ask specific questions
-4. **Build config** - Prepare complete configuration object in memory
-
-### Phase 2: Generate JSON
-
-1. **Create template structure in memory**
-   - templateKey (snake_case from template name)
+1. **Basic info:**
+   - templateKey (snake_case from name)
    - name, description, icon
-   - lists with fields and workflow stages
-   - metadata (version, author, tags)
+   - metadata (version, author, tags, category)
 
-2. **Add items based on user preference**
-   - **Default**: Empty stages (no items)
-   - **If user wants examples**: Add 1-2 simple placeholder items
-     - Use generic names: "Sample Task 1", "Example Item"
-     - Use placeholder text: "Description here"
-     - **NEVER** use fake realistic data (no fake names, companies, etc.)
+2. **Lists with:**
+   - Fields (TEXT, TEXTAREA, SELECT, DATE, etc.)
+   - Stages (To Do, In Progress, Done, etc.)
+   - Empty items (no sample data)
 
-3. **Write ONLY ONE JSON file to current directory**
-   ```
-   [templateKey].template.json
-   ```
+3. **Documents (in template.documents field):**
+   - Add helpful documents directly to template.documents array
+   - Each document has: `title`, `description`, `content` (markdown text)
+   - **Examples by category:**
+     - **Development**: Bug report template, testing checklist
+     - **HR/Recruitment**: Interview questions, evaluation guide
+     - **Customer Service**: Response templates, escalation procedures
+     - **Project Management**: Project guidelines, meeting notes
+     - **Sales/Business**: Sales process guide, objection handling
+     - **Generic**: Getting started guide, team guidelines
+   - **These documents are already in template.json - no need to create separate files!**
 
-   **DO NOT create folders or additional files at this stage!**
+**⚠️ IMPORTANT - Documents Strategy:**
+- **Markdown/Text documents**: Add to `template.documents` field (already in JSON)
+- **Binary documents (docx/excel/pdf)**: Use `additionalFiles` parameter (Step 3)
+- **Do NOT duplicate** - if content is in template.documents, don't create separate file
 
-### Phase 3: Create ZIP Package
+**Example structure:**
+```javascript
+{
+  templateKey: "bug_tracking",
+  name: "Bug Tracking",
+  description: "Track and manage software bugs",
+  icon: "🐛",
+  isActive: true,
+  lists: [{
+    key: "bugs",
+    name: "Bugs",
+    fieldDefinitions: [
+      { key: "title", name: "Title", type: "TEXT", required: true },
+      { key: "priority", name: "Priority", type: "SELECT", options: [...] }
+    ],
+    stages: [
+      { key: "new", name: "New", color: "#EF4444", order: 0, items: [] },
+      { key: "in_progress", name: "In Progress", color: "#F59E0B", order: 1, items: [] },
+      { key: "done", name: "Done", color: "#10B981", order: 2, items: [] }
+    ]
+  }],
+  documents: [
+    {
+      title: "Bug Report Template",
+      description: "Standard template for reporting bugs",
+      content: "# Bug Report Template\n\n## Description\n..."
+    }
+  ],
+  metadata: {
+    version: "1.0.0",
+    author: "AI Template Generator",
+    createdAt: "2026-02-12",
+    tags: ["bugs", "development"],
+    category: "Development"
+  }
+}
+```
 
-1. **Generate IMPORT.md content in memory**
-   - Import instructions
-   - Template structure overview
-   - Usage examples
+### Step 3: Create Package Files
 
-2. **Create ZIP in memory using native code**
-   - Add: template.json (from Phase 2)
-   - Add: IMPORT.md (generated in memory)
-   - Package using built-in SimpleZip class
+**AI executes packaging internally - DO NOT read script file!**
 
-3. **Write ONLY ONE ZIP file to current directory**
-   ```
-   [templateKey].zip
-   ```
+**How to use:**
 
-**CRITICAL RULES - DO NOT CREATE:**
-- ❌ NO folders (docs/, packages/, reports/, scripts/, templates/)
-- ❌ NO config files (config-*.json, package.json, package-lock.json)
-- ❌ NO additional documentation (CLAUDE.md, README.md)
-- ❌ NO .env files in output
+AI builds the complete template JSON object in memory, then calls the packaging function:
 
-**ONLY CREATE EXACTLY 2 FILES:**
-1. `[templateKey].template.json` - In current directory
-2. `[templateKey].zip` - In current directory
+```javascript
+const { createSkillPackage } = require('./scripts/template-skill-generator.js');
 
-### Phase 4: Report Results
+// Basic usage - just template
+const result = await createSkillPackage(template);
+
+// With additional documents (docx, excel, pdf, etc.)
+const additionalFiles = [
+  {
+    filename: 'interview_template.docx',
+    buffer: Buffer.from(docxContent)  // Binary content for docx/pdf/excel
+  },
+  {
+    filename: 'checklist.md',
+    content: '# Checklist\n...'  // Text content for md/txt
+  }
+];
+const result = await createSkillPackage(template, null, additionalFiles);
+```
+
+**⚠️ IMPORTANT:**
+- **DO NOT** use Read tool to read the script file
+- **DO NOT** inspect or analyze the script code
+- **JUST CALL** the function with your template object
+- The script is already available in the skill package
+
+**Additional Files Parameter (Optional):**
+
+**ONLY use for binary documents (docx, excel, pdf) - NOT for markdown/text!**
+
+If you need to include binary documents:
+
+```javascript
+additionalFiles = [
+  {
+    filename: 'form_template.docx',  // Word document
+    buffer: Buffer.from(...)          // Binary content
+  },
+  {
+    filename: 'data_sheet.xlsx',     // Excel spreadsheet
+    buffer: Buffer.from(...)          // Binary content
+  },
+  {
+    filename: 'handbook.pdf',         // PDF document
+    buffer: Buffer.from(...)          // Binary content
+  }
+]
+```
+
+**DO NOT add markdown/text files here - they're already in template.documents!**
+
+**These files will be added to `docs/` folder in the ZIP package.**
+
+**What the script does (you don't need to know, just call it):**
+
+1. Writes `[templateKey].template.json` to current directory
+   - **Includes all documents from template.documents field**
+2. Generates `IMPORT.md` with template info and instructions
+3. Creates `docs/` folder and writes additional binary files (if provided)
+   - **ONLY for docx/excel/pdf - NOT for markdown/text**
+4. Creates ZIP file containing:
+   - `template.json` (with documents field)
+   - `IMPORT.md`
+   - `docs/` folder (only if binary files provided)
+5. Uploads to service (if UPLOAD_SERVICE_URL is set)
+6. Returns result object with file paths and download URL
+
+**Important Notes:**
+- Markdown/text documents are in template.json (template.documents field)
+- Binary documents (docx/excel/pdf) go in docs/ folder
+- Don't duplicate content between template.documents and additionalFiles
+
+**Output location:** Current directory
+
+**Files created:**
+- `[templateKey].template.json` - Template data
+- `[templateKey].zip` - Package ready for import
+- `docs/` folder (if additional files provided)
+
+**ZIP package structure:**
+```
+template.zip
+├── template.json
+├── IMPORT.md
+└── docs/              (optional)
+    ├── document.docx
+    ├── spreadsheet.xlsx
+    ├── guide.pdf
+    └── notes.md
+```
+
+**⚠️ CRITICAL - DO NOT CREATE:**
+- ❌ Folders OTHER THAN `docs/` (no packages/, reports/, scripts/, templates/)
+- ❌ Config files (package.json, package-lock.json, config-*.json)
+- ❌ Documentation files in root (CLAUDE.md, README.md, .env.example)
+- ❌ Any other files or directories
+
+**✅ ALLOWED TO CREATE:**
+- `[templateKey].template.json` in current directory
+- `[templateKey].zip` in current directory
+- `docs/` folder with additional documents (optional)
+
+### Step 4: Report Results to User
 
 **Provide a friendly, clear summary:**
+
+**✅ MUST include download link if available:**
 
 ```
 ✅ Done! Your [Template Name] template is ready!
@@ -197,9 +280,12 @@ Only add sample items if user specifically asks or confirms they want examples.
    ✓ template.json - All your template settings
    ✓ IMPORT.md - Simple instructions to import
 
+🔗 Download link:
+   [SHOW THE ACTUAL DOWNLOAD URL HERE IF IT EXISTS]
+
 🎯 What's next?
-   1. Take the ZIP file ([templateKey].zip)
-   2. Upload it to your system
+   1. Share this link with anyone who needs the template
+   2. Or download and upload to your system
    3. The system will read the instructions and set everything up automatically
 
 That's it! Your template is ready to use. 🚀
@@ -209,9 +295,10 @@ That's it! Your template is ready to use. 🚀
 - Use simple, friendly language
 - Avoid technical terms (use "settings" instead of "data structure")
 - Be encouraging and clear
+- **ALWAYS show download link if available**
 - Show practical next steps
 
-## Template Structure
+## Template Structure Reference
 
 ### Root Level
 ```json
@@ -251,292 +338,170 @@ That's it! Your template is ready to use. 🚀
   "name": "Stage Name",
   "color": "#HEX",
   "order": 0,
-  "items": []  // Items INSIDE stage
+  "items": []  // Items INSIDE stage - no stageKey needed
 }
 ```
 
-### Item Structure
+### Document Structure
 ```json
 {
-  "key": "snake_case",
-  "name": "Item Name",
-  "description": "Description",
-  "order": 0,
-  "customFields": [
-    {"fieldKey": "field_key", "value": "value"}
-  ]
-  // NO stageKey - items are inside their stage
+  "title": "Document Title",
+  "description": "Brief description",
+  "content": "Markdown or plain text content..."
 }
 ```
 
 ## Field Types
 
-| Type | Usage |
-|------|-------|
-| TEXT | Short text |
-| TEXTAREA | Long text |
-| NUMBER | Numbers |
-| DATE | Date only |
-| DATE_TIME | Date + time |
-| SELECT | Single choice (needs options[]) |
-| MULTI_SELECT | Multiple choices (needs options[]) |
-| CHECKBOX | Boolean |
-| ASSIGNEE | User assignment |
-| DEADLINE | Due date |
-| FILE | Single file |
-| FILE_MULTIPLE | Multiple files |
-| USER | User reference |
-
-## SELECT/MULTI_SELECT Options Format
-```json
-{
-  "value": "Option Label",
-  "color": "#HEX",
-  "order": 0
-}
-```
-
-## Default Colors
-```javascript
-["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#6B7280"]
-```
-
-## Execution Examples
-
-### Example 1: Clear Request - Auto-generate Empty Template
-
-**User:** "Create a customer support ticket system"
-
-**AI thinks:** Purpose is clear, can infer workflow. Create empty template.
-
-**AI Response:**
-```
-✅ Done! Your Customer Support Tickets template is ready!
-
-📋 Template: Customer Support Tickets
-🔑 ID: customer_support_tickets
-📁 Category: Customer Support
-
-📄 Created 2 files:
-   1. customer_support_tickets.template.json (3.2 KB) - Your template data
-   2. customer_support_tickets.zip (7.5 KB) - Ready to import
-
-📦 The ZIP file includes:
-   ✓ template.json - All your template settings
-   ✓ IMPORT.md - Simple instructions to import
-
-🎯 What's next?
-   1. Take the ZIP file (customer_support_tickets.zip)
-   2. Upload it to your system
-   3. The system will read the instructions and set everything up automatically
-
-That's it! Your template is ready to use. 🚀
-```
-
-**Template created with:**
-- Stages: New, In Progress, Waiting on Customer, Resolved
-- Fields: Ticket Title, Customer Name, Description, Priority, Status
-- **Items: Empty** (no sample data)
-
----
-
-### Example 2: Vague Request - Ask Friendly Questions
-
-**User:** "Create a template"
-
-**AI Response:**
-```
-I'd be happy to help you create a template!
-
-To make it useful for you, could you tell me:
-1. What would you like to track? (like bugs, customer requests, job candidates, tasks, etc.)
-2. What are the main steps in your process? (for example: New → In Progress → Done)
-
-This will help me set up the right workflow for you!
-```
-
-**User:** "Track job candidates in our hiring process"
-
-**AI Response:**
-```
-Perfect! One more quick question - would you like me to add a couple of example candidates to show how it works, or just create an empty template?
-```
-
-**User:** "Just empty, we'll add our own candidates"
-
-**AI generates:** Empty recruitment template with stages but no sample items.
-
----
-
-### Example 3: Request with Sample Data Preference
-
-**User:** "Create bug tracking template with some examples"
-
-**AI Response:**
-```
-✅ Done! Your Bug Tracking template is ready!
-
-📋 Template: Bug Tracking
-🔑 ID: bug_tracking
-📁 Category: Development
-
-📄 Created 2 files:
-   1. bug_tracking.template.json (3.8 KB) - Your template data
-   2. bug_tracking.zip (8.1 KB) - Ready to import
-
-📦 The ZIP file includes:
-   ✓ template.json - All your template settings (with 2 example bugs)
-   ✓ IMPORT.md - Simple instructions to import
-
-🎯 What's next?
-   1. Take the ZIP file (bug_tracking.zip)
-   2. Upload it to your system
-   3. The system will read the instructions and set everything up automatically
-
-That's it! Your template is ready to use. 🚀
-
-ℹ️ Note: I added 2 simple example bugs so you can see how it works.
-   Feel free to delete them and add your real bugs!
-```
-
-**Sample items added (generic placeholders):**
-- "Sample Bug 1" - Description here
-- "Sample Bug 2" - Another example
-
-**NOT added (fake realistic data):**
-- ❌ "Login page crashes when..." (too specific/realistic)
-- ❌ "John Doe reported..." (fake person name)
-
----
-
-### Example 4: Recruitment Template - Empty (Realistic Use Case)
-
-**User:** "I need a template for tracking developer recruitment"
-
-**AI thinks:** This is for real recruitment, they have real candidates. Should NOT create fake candidate names!
-
-**AI Response:**
-```
-✅ Done! Your Developer Recruitment template is ready!
-
-📋 Template: Developer Recruitment
-🔑 ID: developer_recruitment
-📁 Category: HR & Recruitment
-
-📄 Created 2 files:
-   1. developer_recruitment.template.json (2.9 KB) - Your template data
-   2. developer_recruitment.zip (6.8 KB) - Ready to import
-
-📦 The ZIP file includes:
-   ✓ template.json - All your template settings
-   ✓ IMPORT.md - Simple instructions to import
-
-🎯 What's next?
-   1. Take the ZIP file (developer_recruitment.zip)
-   2. Upload it to your system
-   3. The system will read the instructions and set everything up automatically
-
-That's it! Your template is ready to use. 🚀
-
-ℹ️ Your template has these workflow stages:
-   → CV Screening → Phone Interview → Technical Test → Final Interview → Offer → Hired
-
-   The template is empty and ready for you to add your real candidates!
-```
-
-**Template created with:**
-- Stages: CV Screening, Phone Interview, Technical Test, Final Interview, Offer, Hired
-- Fields: Candidate Name, Email, Phone, Resume, Skills, Experience, Notes
-- **Items: EMPTY** - User will add real candidates, not fake ones!
-
-## Critical Rules
-
-1. **BE FRIENDLY** - Use simple language, be helpful and encouraging
-2. **ASK SMART** - Only ask when truly needed, in a conversational way
-3. **NO FAKE DATA** - Never create fake realistic names, companies, or details
-4. **EMPTY BY DEFAULT** - Create empty templates unless user asks for examples
-5. **BOTH FILES ALWAYS** - Always create JSON + ZIP files
-6. **ITEMS IN STAGES** - Never use stageKey, items array is inside each stage
-7. **SNAKE_CASE KEYS** - All keys must be snake_case
-8. **SEQUENTIAL ORDER** - Start from 0, increment
-9. **VALID COLORS** - Use hex colors from default palette
-10. **CLEAR SUMMARY** - Always provide friendly, clear result summary
-
-## Communication Guidelines
-
-**Friendly & Clear:**
-- ✅ "Done! Your template is ready!"
-- ✅ "What would you like to track?"
-- ✅ "Take the ZIP file and upload it"
-
-**Avoid Technical Jargon:**
-- ❌ "Template data structure generated"
-- ❌ "Execute package creation process"
-- ❌ "Initialize metadata object"
-
-**Use:**
-- "Template settings" instead of "data structure"
-- "Create" instead of "generate/initialize"
-- "Upload" instead of "deploy/provision"
-- "Ready to use" instead of "production-ready"
+| Type | Usage | Example |
+|------|-------|---------|
+| TEXT | Short text | "Task name" |
+| TEXTAREA | Long text | "Description..." |
+| NUMBER | Numeric value | 100 |
+| DATE | Date only | "2026-02-10" |
+| DATE_TIME | Date + time | "2026-02-10T10:00:00Z" |
+| SELECT | Single choice | "High" |
+| MULTI_SELECT | Multiple choices | ["tag1", "tag2"] |
+| CHECKBOX | Boolean | true/false |
+| ASSIGNEE | User assignment | user_id |
+| DEADLINE | Due date | "2026-02-15" |
+| FILE | Single file | file object |
+| FILE_MULTIPLE | Multiple files | [files] |
+| USER | User reference | user_id |
 
 ## Default Inference
 
 If user doesn't specify:
-- **Stages**: Use ["To Do", "In Progress", "Done"]
-- **Fields**: Use [
-    {"name": "Title", "type": "TEXT", "required": true},
-    {"name": "Description", "type": "TEXTAREA"},
-    {"name": "Priority", "type": "SELECT", "options": [
-      {"value": "High", "color": "#EF4444", "order": 0},
-      {"value": "Medium", "color": "#F59E0B", "order": 1},
-      {"value": "Low", "color": "#10B981", "order": 2}
-    ]}
-  ]
 
-## File Locations
-
-**Write files to CURRENT DIRECTORY only:**
-
-- Template JSON: `[templateKey].template.json`
-- ZIP package: `[templateKey].zip`
-
-**DO NOT create folders or subdirectories!**
-
-## Tool Usage
-
-Generate template using script:
-```bash
-node scripts/template-skill-generator.js --quick "[Template Name]"
+**Stages:**
+```javascript
+["To Do", "In Progress", "Done"]
 ```
 
-Or use config file:
-```bash
-node scripts/template-skill-generator.js --config my-config.json
+**Fields:**
+```javascript
+[
+  { name: "Title", type: "TEXT", required: true },
+  { name: "Description", type: "TEXTAREA" },
+  { name: "Priority", type: "SELECT", options: [
+    { value: "High", color: "#EF4444", order: 0 },
+    { value: "Medium", color: "#F59E0B", order: 1 },
+    { value: "Low", color: "#10B981", order: 2 }
+  ]}
+]
 ```
+
+**Default Colors:**
+```javascript
+["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#6B7280"]
+```
+
+## Upload Service Integration
+
+**Configuration:**
+
+Set environment variable:
+```bash
+UPLOAD_SERVICE_URL=https://your-upload-service.com
+```
+
+**How it works:**
+
+1. After creating ZIP → Uploads to service
+2. POST to `/uploads` endpoint with multipart/form-data
+3. Receives download URL in response
+4. Returns URL to AI for display to user
+
+**If not configured:**
+- ZIP saved locally only
+- No download link available
+- User uploads manually
+
+## Common Issues
+
+### Files Not Created
+
+**Symptoms:** No .template.json or .zip files in directory
+
+**Solutions:**
+- Check that `createSkillPackage()` was called with valid template
+- Verify template has required fields (templateKey, name, lists)
+- Check file write permissions in current directory
+
+### Download Link Not Shown
+
+**Symptoms:** Files created but no download link in summary
+
+**Solutions:**
+- Verify UPLOAD_SERVICE_URL is set in environment
+- Check upload service is accessible
+- Ensure service returns valid URL in response
+- **CRITICAL:** AI must display downloadUrl from result object
+
+### Invalid Template Structure
+
+**Symptoms:** Template fails validation on import
+
+**Solutions:**
+- Verify all keys are snake_case
+- Check items are nested inside stages (not separate with stageKey)
+- Ensure colors are valid hex codes (#RRGGBB)
+- Validate fieldDefinitions have required properties
+
+### Documents Not Generated
+
+**Symptoms:** documents array is empty
+
+**Solutions:**
+- Auto-generation works based on category/name detection
+- If category doesn't match presets → generic documents are added
+- Documents are always added (either specific or generic)
+
+## Integration with Development Workflow
+
+### Template Creation Flow
+
+1. User requests template
+2. AI gathers requirements (asks if needed)
+3. AI builds template JSON in memory
+4. AI calls `createSkillPackage(template)`
+5. Script creates files and uploads
+6. AI displays summary with download link
+
+### After Template Creation
+
+1. User downloads ZIP or shares link
+2. User uploads to Priovs system
+3. System reads IMPORT.md for instructions
+4. System imports template.json structure
+5. Template ready to use in Priovs
+
+## Best Practices
+
+- **Always create empty templates**: No sample items unless explicitly requested
+- **Documents in template.json**: Add markdown/text documents to template.documents field
+- **Binary files separate**: Only use additionalFiles for docx/excel/pdf
+- **Don't duplicate content**: If in template.documents, don't create separate file
+- **Show download link**: If available, display prominently in summary
+- **Use simple language**: Avoid technical jargon when communicating with user
+- **Be conversational**: Make interaction friendly and helpful
+- **Never ask about format**: Output is always JSON + ZIP
+- **Proper structure**: Items inside stages, all keys snake_case
+- **Complete workflow**: Gather → Build → Package → Upload → Report
 
 ## Success Criteria
 
-✅ ONLY 2 files created in current directory:
-   - `[templateKey].template.json`
-   - `[templateKey].zip`
-✅ NO folders created (no docs/, packages/, scripts/, templates/)
+✅ Files created in current directory:
+   - `[templateKey].template.json` (always)
+   - `[templateKey].zip` (always)
+   - `docs/` folder (optional - if additional files provided)
+✅ NO folders created OTHER THAN `docs/` (no packages/, scripts/, templates/)
 ✅ NO config files created (no package.json, CLAUDE.md, etc.)
 ✅ JSON has valid structure (lists → stages → items)
 ✅ All keys are snake_case
 ✅ Colors are valid hex codes
 ✅ At least 1 list, 2+ stages, 2+ fields
-✅ ZIP contains ONLY: template.json + IMPORT.md
-✅ User receives complete summary with file paths and sizes
-✅ ZIP contains: template.json, IMPORT.md, .env.example
-
-## Remember
-
-- **Be friendly and helpful** - Use simple language, avoid technical jargon
-- **Smart questioning** - Ask conversationally when info is unclear
-- **No fake data** - Never create realistic fake names, companies, or details
-- **Empty by default** - Create templates without sample items unless requested
-- **Complete workflow** - Gather info → Generate JSON → Create ZIP → Report
-- **Both files always** - JSON + ZIP in current directory
-- **Proper structure** - Items inside stages, no stageKey
-- **Clear summary** - Friendly report with practical next steps
+✅ ZIP contains: template.json + IMPORT.md + docs/ (if provided)
+✅ User receives complete summary with file paths and download link
+✅ Documents auto-generated based on category
+✅ Additional files (docx/excel/pdf) in docs/ folder if AI generated them

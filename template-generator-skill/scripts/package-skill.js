@@ -113,13 +113,9 @@ class SimpleZip {
 function packageSkill() {
   const zip = new SimpleZip();
 
-  // Add SKILL.md
+  // Add SKILL.md (now contains all documentation)
   const skillMd = fs.readFileSync('./SKILL.md', 'utf8');
   zip.addFile('SKILL.md', skillMd);
-
-  // Add README.md
-  const readmeMd = fs.readFileSync('./README.md', 'utf8');
-  zip.addFile('README.md', readmeMd);
 
   // Add main script
   const mainScript = fs.readFileSync('./scripts/template-skill-generator.js', 'utf8');
@@ -153,8 +149,7 @@ function packageSkill() {
   console.log(`📦 Package: ${path.resolve(outputPath)}`);
   console.log(`📋 Size: ${zipBuffer.length} bytes`);
   console.log('\n📁 Contents:');
-  console.log('   ✓ SKILL.md - AI skill instructions');
-  console.log('   ✓ README.md - Documentation');
+  console.log('   ✓ SKILL.md - Complete documentation & AI instructions');
   console.log('   ✓ scripts/template-skill-generator.js - Main tool');
   console.log('   ✓ scripts/inspect-zip.js - ZIP inspector');
   console.log('   ✓ examples/*.template.json - Example templates');

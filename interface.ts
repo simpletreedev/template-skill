@@ -72,8 +72,8 @@ interface ITemplate {
   description: string;
   icon?: string;
   isActive: true;
-  lists: [];
-  documents: [];
+  lists: IList[];
+  documents: IDocument[];
   metadata: {
     version: string;
   };
