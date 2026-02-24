@@ -26,6 +26,7 @@ export interface IOption {
     value: string;
     color?: string;
     order?: number;
+    
 }
 
 // ==================== Field Definition (Template) ====================

@@ -288,18 +288,18 @@ templates/
   "description": "Track tasks across project stages",
   "fieldDefinitions": [
     {
-      "_id": "field_priority",
+      "key": "field_priority",
       "name": "Priority",
       "type": "SELECT",
       "options": [
-        { "_id": "pri_high", "value": "High", "color": "#FF4444", "order": 1 },
-        { "_id": "pri_medium", "value": "Medium", "color": "#FFB800", "order": 2 },
-        { "_id": "pri_low", "value": "Low", "color": "#00D449", "order": 3 }
+        { "key": "pri_high", "value": "High", "color": "#FF4444", "order": 1 },
+        { "key": "pri_medium", "value": "Medium", "color": "#FFB800", "order": 2 },
+        { "key": "pri_low", "value": "Low", "color": "#00D449", "order": 3 }
       ],
       "order": 1
     },
     {
-      "_id": "field_assignee",
+      "key": "field_assignee",
       "name": "Assignee",
       "type": "USER",
       "order": 2
