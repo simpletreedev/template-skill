@@ -94,16 +94,58 @@ cd ..
 
 ---
 
-### 4. Clean Up Temporary Files
+### 4. Upload to Cloud Server
 
 ```bash
+ZIP_FILE="${SLUG}-template.zip"
+
+echo "📤 Uploading ${ZIP_FILE} to cloud server..."
+
+# Upload to cloud server and get URL
+UPLOAD_RESPONSE=$(curl -X POST \
+  -F "file=@${ZIP_FILE}" \
+  https://nfknprk0-8000.asse.devtunnels.ms/api/v1/triggers/upload)
+
+# Extract URL from JSON response
+DOWNLOAD_URL=$(echo ${UPLOAD_RESPONSE} | jq -r '.url')
+
+if [[ "${DOWNLOAD_URL}" != "null" && -n "${DOWNLOAD_URL}" ]]; then
+  echo "✅ Upload successful!"
+  echo "📦 Cloud URL: ${DOWNLOAD_URL}"
+else
+  echo "❌ Upload failed. Response: ${UPLOAD_RESPONSE}"
+  # Exit with error - don't continue
+  echo ""
+  echo "❌ Error: Failed to upload template to server"
+  echo ""
+  echo "There was an error while creating the template export. Server response:"
+  echo "${UPLOAD_RESPONSE}"
+  echo ""
+  echo "Would you like me to try again? (say 'retry' to attempt upload again)"
+  exit 1
+fi
+```
+
+**NOTE:** If user says "retry", go back to step 4 and attempt the upload again without recreating the ZIP file.
+
+---
+
+### 5. Clean Up Temporary Files
+
+```bash
+# Only remove template folder, keep ZIP file for local backup
 rm -rf template-${SLUG}/
 rm .template-generator-state.json
+
+# If upload successful, you can optionally remove the local ZIP
+# if [[ -n "${DOWNLOAD_URL}" ]]; then
+#   rm ${ZIP_FILE}
+# fi
 ```
 
 ---
 
-### 5. Show Final Success Message
+### 6. Show Final Success Message
 
 ```
 ✅ Done! Your ${Template Name} template is ready!
@@ -128,16 +170,18 @@ rm .template-generator-state.json
    📋 Lists: ${lists_count}
    📄 Documents: ${documents_count}
    📁 Files: ${files_count}
-   ⚙️  Automations: ${automations_count}
+   ⚙️ Automations: ${automations_count}
    🤖 Chat Agents: ${agents_count}
    🧠 AI Workspaces: ${workspaces_count}
 
-📥 File: ${template-name}-template.zip
+📥 Download your template:
+🔗 ${SLUG}-template.zip ${DOWNLOAD_URL}
 
 🎯 What's next?
-   1. Extract the ZIP file
-   2. Import into your system using IMPORT.md
-   3. Start using your template!
+   1. Click the link above to download your template
+   2. Extract the ZIP file
+   3. Import into your system using IMPORT.md
+   4. Start using your template!
 
 🚀 Ready to use!
 ```

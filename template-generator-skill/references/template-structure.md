@@ -12,8 +12,10 @@ templates/
 │   │   └── data/                                    # Data folders for each list
 │   │       ├── list-template-1/
 │   │       │   └── data.json                        # {key, name, fieldDefinitions, stages, defaultItems}
+│   │       │   └── automation.json                  # automation config
 │   │       ├── list-template-2/
 │   │       │   └── data.json
+│   │       │   └── automation.json
 │   │       └── ...
 │   │
 │   ├── documents/

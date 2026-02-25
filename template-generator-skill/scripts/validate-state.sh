@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 STATE_FILE=".template-generator-state.json"
-STEPS_DIR="steps"
+STEPS_DIR="references/steps"
 TOTAL_STEPS=8
 
 echo -e "${BLUE}🔍 Template Generator State Validator${NC}"
@@ -50,7 +50,7 @@ echo "Check 1: State file exists"
 if [[ ! -f "$STATE_FILE" ]]; then
   print_error "State file not found: $STATE_FILE"
   echo ""
-  echo "💡 Tip: Run step 0 (steps/00-init.md) to create initial state file"
+  echo "💡 Tip: Run step 0 (references/steps/00-init.md) to create initial state file"
   exit 1
 fi
 print_success "State file found"
