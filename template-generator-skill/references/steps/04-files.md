@@ -8,6 +8,16 @@ Add document files to template using Claude's built-in skills (xlsx, docx, pdf).
 
 ## What To Do
 
+### 0. Initialize Step Variables
+
+```bash
+# Load common variables (helpers already loaded by SKILL.md)
+init_step
+# Now: SLUG, NAME, DESCRIPTION, TIMESTAMP are available
+```
+
+---
+
 ### 1. Ask User
 
 "Do you need any **document files** in this template?
@@ -23,7 +33,7 @@ Type 'skip' to continue, or tell me what files you need."
 ### 2. If Skipped
 
 ```bash
-jq '.steps["4_FILES"].status = "skipped"' .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+skip_state 4 "FILES"
 echo "╭──────────────────────────────────────╮"
 echo "│  📁 FILES STEP SKIPPED               │"
 echo "│  No document files added             │"
@@ -37,9 +47,9 @@ return 0
 ### 3. Setup Directory
 
 ```bash
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
 BASE_DIR="template-${SLUG}/entities/files/storage"
-mkdir -p "${BASE_DIR}/"{reports,documents}
+ensure_dir "${BASE_DIR}/reports"
+ensure_dir "${BASE_DIR}/documents"
 ```
 
 ---

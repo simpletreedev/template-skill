@@ -8,15 +8,13 @@ Configure AI chat agents (AI assistants for specific tasks).
 
 ## What To Do
 
-### 0. Read State File
-
-**ALWAYS start by reading current state:**
+### 0. Initialize Step Variables
 
 ```bash
-cat .template-generator-state.json
+# Load common variables (helpers already loaded by SKILL.md)
+init_step
+# Now: SLUG, NAME, DESCRIPTION, TIMESTAMP are available
 ```
-
-This ensures you're working with the latest data.
 
 ---
 
@@ -31,11 +29,8 @@ Type 'skip' to continue, or tell me what agents you need."
 
 ### 2. If User Skips
 
-**Update state file:**
-
 ```bash
-jq '.currentStep = 6 | .steps["6_CHAT_AGENTS"].status = "skipped" | .lastUpdated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' \
-  .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+skip_state 6 "CHAT_AGENTS"
 ```
 
 **Show skip prompt:**
@@ -68,19 +63,32 @@ Your call! 🧠
 
 ---
 
-### 4. Create Agent Data File
+### 4. Create Agent Flow Using flow-generator-skill
 
-For each agent, create:
+**IMPORTANT:** Use the `flow-generator-skill` to create agent flow JSON.
 
 ```bash
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
+# Invoke flow-generator-skill
+SKILL="flow" PROMPT="create agent flow for {Agent Name} with description: {description}" \
+  WORKSPACE="{claudeWs}" COMMANDS="{comma-separated list of /commands}"
+```
+
+The flow-generator-skill will:
+1. Clarify requirements (if needed)
+2. Generate proper flow JSON with nodes and edges
+3. Return formatted JSON compatible with Flowise Agent Flow
+
+**Save the output:**
+```bash
 AGENT_KEY="{agent-key}"
 
-mkdir -p template-${SLUG}/flows/chat-agents/data/${AGENT_KEY}
+ensure_dir "template-${SLUG}/flows/chat-agents/data/${AGENT_KEY}"
 
+# Save flow JSON returned by flow-generator-skill
 cat > template-${SLUG}/flows/chat-agents/data/${AGENT_KEY}/data.json << 'EOF'
 {
   "flowId": "flow-${AGENT_KEY}",
+  "flow": { /* flow JSON from flow-generator-skill */ },
   "name": "{Agent Name}",
   "description": "{Agent Description}",
   "claudeWs": "claude-ws-{key}",
@@ -96,32 +104,19 @@ cat > template-${SLUG}/flows/chat-agents/data/${AGENT_KEY}/data.json << 'EOF'
 EOF
 ```
 
-**Note:** `claudeWs` must reference a workspace created in step 7.
+**Note:** `claudeWs` must reference a workspace created in step 7 (AI Workspaces).
 
 ---
 
 ### 5. Update _agents.json
 
 ```bash
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
 AGENT_KEY="{agent-key}"
 NAME="{Agent Name}"
 DESC="{Agent Description}"
 WS_KEY="claude-ws-{key}"
 
-jq --arg key "agent-${AGENT_KEY}" \
-   --arg name "${NAME}" \
-   --arg desc "${DESC}" \
-   --arg ws "${WS_KEY}" \
-   '.agents += [{
-     "key": $key,
-     "name": $name,
-     "description": $desc,
-     "file": "data/agent-'${AGENT_KEY}'/data.json",
-     "claudeWs": $ws,
-     "order": (.agents | length)
-   }]' \
-   template-${SLUG}/flows/chat-agents/_agents.json > .tmp && mv .tmp template-${SLUG}/flows/chat-agents/_agents.json
+add_agent_to_index "${SLUG}" "flows/chat-agents/_agents.json" "agent-${AGENT_KEY}" "${NAME}" "${DESC}" "data/agent-${AGENT_KEY}/data.json" "${WS_KEY}"
 ```
 
 ---
@@ -131,11 +126,8 @@ jq --arg key "agent-${AGENT_KEY}" \
 **CRITICAL: Update state after completing agents:**
 
 ```bash
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
-AGENT_COUNT=$(jq '.agents | length' template-${SLUG}/flows/chat-agents/_agents.json)
-
-jq '.currentStep = 6 | .steps["6_CHAT_AGENTS"].status = "completed" | .summary.chatAgents = '${AGENT_COUNT}' | .lastUpdated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' \
-  .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+AGENT_COUNT=$(get_count "${SLUG}" "flows/chat-agents/_agents.json" "agents")
+update_state 6 "CHAT_AGENTS" "chatAgents" ${AGENT_COUNT}
 ```
 
 ---

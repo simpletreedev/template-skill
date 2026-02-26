@@ -8,27 +8,29 @@ Create the folder structure and initialize all metadata files.
 
 ## What To Do
 
-### 1. Create Folder Structure
+### 1. Initialize Step Variables
 
 ```bash
-# Get template slug from state file
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
-
-# Create directory structure
-mkdir -p template-${SLUG}/entities/{lists,documents,files}/data
-mkdir -p template-${SLUG}/flows/{automations,chat-agents}/data
-mkdir -p template-${SLUG}/claude-ws/data
+# Load common variables (helpers already loaded by SKILL.md)
+init_step
+# Now: SLUG, NAME, DESCRIPTION, TIMESTAMP are available
 ```
 
 ---
 
-### 2. Create metadata.json
+### 2. Create Folder Structure
 
 ```bash
-# Get template info from state
-NAME=$(jq -r '.templateName' .template-generator-state.json)
-DESCRIPTION=$(jq -r '.templateDescription // ""' .template-generator-state.json)
+mkdir -p template-${SLUG}/entities/{lists,documents,files}/data \
+         template-${SLUG}/flows/{automations,chat-agents}/data \
+         template-${SLUG}/claude-ws/data
+```
 
+---
+
+### 3. Create metadata.json
+
+```bash
 cat > template-${SLUG}/metadata.json << EOF
 {
   "name": "${NAME}",
@@ -58,23 +60,14 @@ EOF
 ### 3. Create Empty Metadata Files
 
 ```bash
-# Lists metadata
-echo '{"version": "1.0", "lists": []}' > template-${SLUG}/entities/lists/_lists.json
-
-# Documents metadata
-echo '{"version": "1.0", "documents": []}' > template-${SLUG}/entities/documents/_documents.json
-
-# Files manifest
-echo '{"version": "1.0", "files": {}}' > template-${SLUG}/entities/files/_manifest.json
-
-# Automations metadata
-echo '{"version": "1.0", "automations": []}' > template-${SLUG}/flows/automations/_automations.json
-
-# Chat agents metadata
-echo '{"version": "1.0", "agents": []}' > template-${SLUG}/flows/chat-agents/_agents.json
-
-# Workspaces metadata
-echo '{"version": "1.0", "workspaces": []}' > template-${SLUG}/claude-ws/_workspaces.json
+{
+  echo '{"version": "1.0", "lists": []}' > template-${SLUG}/entities/lists/_lists.json
+  echo '{"version": "1.0", "documents": []}' > template-${SLUG}/entities/documents/_documents.json
+  echo '{"version": "1.0", "files": {}}' > template-${SLUG}/entities/files/_manifest.json
+  echo '{"version": "1.0", "automations": []}' > template-${SLUG}/flows/automations/_automations.json
+  echo '{"version": "1.0", "agents": []}' > template-${SLUG}/flows/chat-agents/_agents.json
+  echo '{"version": "1.0", "workspaces": []}' > template-${SLUG}/claude-ws/_workspaces.json
+}
 ```
 
 ---
@@ -82,7 +75,7 @@ echo '{"version": "1.0", "workspaces": []}' > template-${SLUG}/claude-ws/_worksp
 ### 4. Update State File
 
 ```bash
-jq '.currentStep = 1 | .steps["1_BASE_STRUCTURE"].status = "completed" | .lastUpdated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+update_state 1 "BASE_STRUCTURE" "dummy" 0
 ```
 
 ---
@@ -119,6 +112,7 @@ Your choice! 🚀
 See `../references/template-structure.md` for complete data structure.
 
 Key files created:
+
 - `metadata.json` - Template information
 - `entities/lists/_lists.json` - Lists tracking file
 - `entities/documents/_documents.json` - Documents tracking file

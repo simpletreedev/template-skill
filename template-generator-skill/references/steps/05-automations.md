@@ -8,15 +8,13 @@ Configure automation rules (smart rules: "when X happens, do Y").
 
 ## What To Do
 
-### 0. Read State File
-
-**ALWAYS start by reading current state:**
+### 0. Initialize Step Variables
 
 ```bash
-cat .template-generator-state.json
+# Load common variables (helpers already loaded by SKILL.md)
+init_step
+# Now: SLUG, NAME, DESCRIPTION, TIMESTAMP are available
 ```
-
-This ensures you're working with the latest data.
 
 ---
 
@@ -31,11 +29,8 @@ Type 'skip' to continue, or tell me what automations you need."
 
 ### 2. If User Skips
 
-**Update state file:**
-
 ```bash
-jq '.currentStep = 5 | .steps["5_AUTOMATIONS"].status = "skipped" | .lastUpdated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' \
-  .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+skip_state 5 "AUTOMATIONS"
 ```
 
 **Show skip prompt:**
@@ -72,10 +67,9 @@ Your call! 🤖
 For each automation, create:
 
 ```bash
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
 AUTO_KEY="{auto-key}"
 
-mkdir -p template-${SLUG}/flows/automations/data/${AUTO_KEY}
+ensure_dir "template-${SLUG}/flows/automations/data/${AUTO_KEY}"
 
 cat > template-${SLUG}/flows/automations/data/${AUTO_KEY}/data.json << 'EOF'
 {
@@ -115,23 +109,11 @@ EOF
 ### 5. Update _automations.json
 
 ```bash
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
 AUTO_KEY="{auto-key}"
 NAME="{Automation Name}"
 DESC="{Description}"
 
-jq --arg key "automation-${AUTO_KEY}" \
-   --arg name "${NAME}" \
-   --arg desc "${DESC}" \
-   '.automations += [{
-     "key": $key,
-     "name": $name,
-     "description": $desc,
-     "file": "data/automation-'${AUTO_KEY}'/data.json",
-     "triggers": ["item_created"],
-     "order": (.automations | length)
-   }]' \
-   template-${SLUG}/flows/automations/_automations.json > .tmp && mv .tmp template-${SLUG}/flows/automations/_automations.json
+add_to_index "${SLUG}" "flows/automations/_automations.json" "automation-${AUTO_KEY}" "${NAME}" "${DESC}" "data/automation-${AUTO_KEY}/data.json"
 ```
 
 ---
@@ -141,11 +123,8 @@ jq --arg key "automation-${AUTO_KEY}" \
 **CRITICAL: Update state after completing automations:**
 
 ```bash
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
-AUTO_COUNT=$(jq '.automations | length' template-${SLUG}/flows/automations/_automations.json)
-
-jq '.currentStep = 5 | .steps["5_AUTOMATIONS"].status = "completed" | .summary.automations = '${AUTO_COUNT}' | .lastUpdated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' \
-  .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+AUTO_COUNT=$(get_count "${SLUG}" "flows/automations/_automations.json" "automations")
+update_state 5 "AUTOMATIONS" "automations" ${AUTO_COUNT}
 ```
 
 ---

@@ -8,15 +8,13 @@ Configure AI workspaces (customize AI with your knowledge).
 
 ## What To Do
 
-### 0. Read State File
-
-**ALWAYS start by reading current state:**
+### 0. Initialize Step Variables
 
 ```bash
-cat .template-generator-state.json
+# Load common variables (helpers already loaded by SKILL.md)
+init_step
+# Now: SLUG, NAME, DESCRIPTION, TIMESTAMP are available
 ```
-
-This ensures you're working with the latest data.
 
 ---
 
@@ -31,11 +29,8 @@ Type 'skip' to continue, or tell me what workspaces you need."
 
 ### 2. If User Skips
 
-**Update state file:**
-
 ```bash
-jq '.currentStep = 7 | .steps["7_AI_WORKSPACES"].status = "skipped" | .lastUpdated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' \
-  .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+skip_state 7 "AI_WORKSPACES"
 ```
 
 **Show skip prompt:**
@@ -73,10 +68,11 @@ Your call! 📦
 ### 4. Create Workspace Structure
 
 ```bash
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
 WS_KEY="{ws-key}"
 
-mkdir -p template-${SLUG}/claude-ws/data/${WS_KEY}/{agents,skills,commands}
+ensure_dir "template-${SLUG}/claude-ws/data/${WS_KEY}/agents"
+ensure_dir "template-${SLUG}/claude-ws/data/${WS_KEY}/skills"
+ensure_dir "template-${SLUG}/claude-ws/data/${WS_KEY}/commands"
 ```
 
 ---
@@ -133,24 +129,11 @@ EOF
 ### 6. Update _workspaces.json
 
 ```bash
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
 WS_KEY="{ws-key}"
 NAME="{Workspace Name}"
 DESC="{Description}"
 
-jq --arg key "claude-ws-${WS_KEY}" \
-   --arg name "${NAME}" \
-   --arg desc "${DESC}" \
-   --arg folder "data/claude-ws-${WS_KEY}" \
-   '.workspaces += [{
-     "key": $key,
-     "name": $name,
-     "description": $desc,
-     "folder": $folder,
-     "model": "claude-3-5-sonnet",
-     "order": (.workspaces | length)
-   }]' \
-   template-${SLUG}/claude-ws/_workspaces.json > .tmp && mv .tmp template-${SLUG}/claude-ws/_workspaces.json
+add_to_index "${SLUG}" "claude-ws/_workspaces.json" "claude-ws-${WS_KEY}" "${NAME}" "${DESC}" "data/claude-ws-${WS_KEY}"
 ```
 
 ---
@@ -160,11 +143,8 @@ jq --arg key "claude-ws-${WS_KEY}" \
 **CRITICAL: Update state after completing workspaces:**
 
 ```bash
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
-WS_COUNT=$(jq '.workspaces | length' template-${SLUG}/claude-ws/_workspaces.json)
-
-jq '.currentStep = 7 | .steps["7_AI_WORKSPACES"].status = "completed" | .summary.claudeWorkspaces = '${WS_COUNT}' | .lastUpdated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' \
-  .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+WS_COUNT=$(get_count "${SLUG}" "claude-ws/_workspaces.json" "workspaces")
+update_state 7 "AI_WORKSPACES" "claudeWorkspaces" ${WS_COUNT}
 ```
 
 ---

@@ -8,18 +8,21 @@ Finalize template, create ZIP package, and show success message.
 
 ## What To Do
 
+### 0. Initialize Step Variables
+
+```bash
+# Load common variables (helpers already loaded by SKILL.md)
+init_step
+# Now: SLUG, NAME, DESCRIPTION, TIMESTAMP are available
+```
+
+---
+
 ### 1. Update metadata.json with Final Counts
 
 ```bash
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
-
 # Get counts from state
-LISTS=$(jq -r '.summary.lists' .template-generator-state.json)
-DOCS=$(jq -r '.summary.documents' .template-generator-state.json)
-FILES=$(jq -r '.summary.files' .template-generator-state.json)
-AUTOS=$(jq -r '.summary.automations' .template-generator-state.json)
-AGENTS=$(jq -r '.summary.chatAgents' .template-generator-state.json)
-WS=$(jq -r '.summary.claudeWorkspaces' .template-generator-state.json)
+eval $(jq -r '.summary | @sh "LISTS=\(.lists) DOCS=\(.documents) FILES=\(.files) AUTOS=\(.automations) AGENTS=\(.chatAgents) WS=\(.claudeWorkspaces)"' .template-generator-state.json)
 
 jq --argjson lists ${LISTS} \
    --argjson docs ${DOCS} \
@@ -43,8 +46,7 @@ jq --argjson lists ${LISTS} \
 ### 2. Create IMPORT.md
 
 ```bash
-NAME=$(jq -r '.name' template-${SLUG}/metadata.json)
-DESC=$(jq -r '.description' template-${SLUG}/metadata.json)
+eval $(jq -r '@sh "NAME=\(.name) DESC=\(.description)"' template-${SLUG}/metadata.json)
 
 cat > template-${SLUG}/IMPORT.md << EOF
 # ${NAME} - Import Instructions
@@ -99,27 +101,23 @@ cd ..
 ```bash
 ZIP_FILE="${SLUG}-template.zip"
 
-echo "📤 Uploading ${ZIP_FILE} to cloud server..."
+# Get upload URL from environment or use default
+CLOUD_UPLOAD_URL=$(get_upload_url)
 
 # Upload to cloud server and get URL
-UPLOAD_RESPONSE=$(curl -X POST \
+UPLOAD_RESPONSE=$(curl -s -X POST \
   -F "file=@${ZIP_FILE}" \
-  https://nfknprk0-8000.asse.devtunnels.ms/api/v1/triggers/upload)
+  "${CLOUD_UPLOAD_URL}")
 
 # Extract URL from JSON response
 DOWNLOAD_URL=$(echo ${UPLOAD_RESPONSE} | jq -r '.url')
 
 if [[ "${DOWNLOAD_URL}" != "null" && -n "${DOWNLOAD_URL}" ]]; then
-  echo "✅ Upload successful!"
-  echo "📦 Cloud URL: ${DOWNLOAD_URL}"
+  echo "✅ Upload successful! Cloud URL: ${DOWNLOAD_URL}"
 else
-  echo "❌ Upload failed. Response: ${UPLOAD_RESPONSE}"
   # Exit with error - don't continue
-  echo ""
   echo "❌ Error: Failed to upload template to server"
-  echo ""
-  echo "There was an error while creating the template export. Server response:"
-  echo "${UPLOAD_RESPONSE}"
+  echo "Server response: ${UPLOAD_RESPONSE}"
   echo ""
   echo "Would you like me to try again? (say 'retry' to attempt upload again)"
   exit 1
@@ -133,19 +131,18 @@ fi
 ### 5. Clean Up Temporary Files
 
 ```bash
-# Only remove template folder, keep ZIP file for local backup
 rm -rf template-${SLUG}/
 rm .template-generator-state.json
-
-# If upload successful, you can optionally remove the local ZIP
-# if [[ -n "${DOWNLOAD_URL}" ]]; then
-#   rm ${ZIP_FILE}
-# fi
+rm .tmp* 2>/dev/null || true
+rm .js* 2>/dev/null || true
+rm .py* 2>/dev/null || true
 ```
 
 ---
 
 ### 6. Show Final Success Message
+
+**IMPORTANT: Follow the below example exactly**
 
 ```
 ✅ Done! Your ${Template Name} template is ready!
@@ -188,11 +185,10 @@ rm .template-generator-state.json
 
 ---
 
-### 6. Update State File (Final)
+### 7. Update State File (Final)
 
 ```bash
-jq '.currentStep = 8 | .steps["8_PACKAGE"].status = "completed" | .lastUpdated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' \
-  .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+update_state 8 "PACKAGE" "dummy" 0
 ```
 
 Then delete state file (already done in cleanup step).

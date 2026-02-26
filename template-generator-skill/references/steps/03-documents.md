@@ -8,6 +8,16 @@ Add document templates (wiki pages, guides, meeting notes).
 
 ## What To Do
 
+### 0. Initialize Step Variables
+
+```bash
+# Load common variables (helpers already loaded by SKILL.md)
+init_step
+# Now: SLUG, NAME, DESCRIPTION, TIMESTAMP are available
+```
+
+---
+
 ### 1. Ask User
 
 "Do you need any **documents** in this template?
@@ -20,8 +30,7 @@ Type 'skip' to continue, or tell me how many documents you need."
 ### 2. If User Skips
 
 ```bash
-jq '.currentStep = 3 | .steps["3_DOCUMENTS"].status = "skipped" | .lastUpdated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' \
-  .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+skip_state 3 "DOCUMENTS"
 ```
 
 Show skip prompt and return control.
@@ -39,10 +48,9 @@ Show skip prompt and return control.
 ### 4. Create Document Data File
 
 ```bash
-SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
 DOC_KEY="{doc-key}"
 
-mkdir -p template-${SLUG}/entities/documents/data/${DOC_KEY}
+ensure_dir "template-${SLUG}/entities/documents/data/${DOC_KEY}"
 
 cat > template-${SLUG}/entities/documents/data/${DOC_KEY}/data.json << 'EOF'
 {
@@ -59,11 +67,7 @@ EOF
 ### 5. Update _documents.json
 
 ```bash
-jq --arg key "doc-${DOC_KEY}" \
-   --arg title "{Doc Title}" \
-   --arg desc "{Description}" \
-   '.documents += [{"key": $key, "title": $title, "description": $desc, "file": "data/doc-'${DOC_KEY}'/data.json", "order": (.documents | length)}]' \
-   template-${SLUG}/entities/documents/_documents.json > .tmp && mv .tmp template-${SLUG}/entities/documents/_documents.json
+add_to_index "${SLUG}" "entities/documents/_documents.json" "doc-${DOC_KEY}" "{Doc Title}" "{Description}" "data/doc-${DOC_KEY}/data.json"
 ```
 
 ---
@@ -71,10 +75,8 @@ jq --arg key "doc-${DOC_KEY}" \
 ### 6. Update State File
 
 ```bash
-DOC_COUNT=$(jq '.documents | length' template-${SLUG}/entities/documents/_documents.json)
-
-jq '.currentStep = 3 | .steps["3_DOCUMENTS"].status = "completed" | .summary.documents = '${DOC_COUNT}' | .lastUpdated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' \
-  .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+DOC_COUNT=$(get_count "${SLUG}" "entities/documents/_documents.json" "documents")
+update_state 3 "DOCUMENTS" "documents" ${DOC_COUNT}
 ```
 
 ---

@@ -36,14 +36,16 @@ template-generator-skill/
 │   │   ├── 00-init.md              # Requirements & explanation
 │   │   ├── 01-base-structure.md    # Folder structure
 │   │   ├── 02-lists.md             # Lists & boards
+│   │   ├── 02b-automation-lists.md # List automations (optional, per-list)
 │   │   ├── 03-documents.md         # Documents (optional)
 │   │   ├── 04-files.md             # File attachments (optional)
-│   │   ├── 05-automations.md       # Automations (optional)
+│   │   ├── 05-automations.md       # Global automations (optional)
 │   │   ├── 06-chat-agents.md       # AI chat agents (optional)
 │   │   ├── 07-ai-workspaces.md     # AI workspaces (optional)
 │   │   └── 08-package.md           # Package & export
 │   └── template-structure.md       # Data format reference
 └── scripts/
+    ├── template-helpers.sh         # Helper functions for steps
     ├── upload-to-cloud.sh
     └── validate-state.sh           # State validation
 ```
@@ -101,8 +103,14 @@ fi
 
 **AFTER EACH STEP:**
 ```bash
-jq '.currentStep = N | .steps["N_NAME"].status = "completed" | .summary.{key} = ${COUNT} | .lastUpdated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' \
-  .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+# Initialize step variables
+init_step
+
+# Update state after completion
+update_state N "NAME" "key" COUNT
+
+# OR if skipping:
+skip_state N "NAME"
 ```
 
 **PROGRESS OVERVIEW:**
@@ -118,6 +126,17 @@ jq '.currentStep = N | .steps["N_NAME"].status = "completed" | .summary.{key} = 
 ---
 
 ## Workflow
+
+### 0. Initialize (ONCE at start)
+
+```bash
+# Load helper functions ONCE for all steps
+source scripts/template-helpers.sh
+```
+
+This loads all helper functions (init_step, update_state, skip_state, add_to_index, etc.) making them available for all steps.
+
+---
 
 ### 1. Start or Resume
 
@@ -159,9 +178,10 @@ Load `references/steps/08-package.md` → ZIP template → Delete state
 | 0 | `00-init.md` | Requirements gathering | No |
 | 1 | `01-base-structure.md` | Folder structure | No |
 | 2 | `02-lists.md` | Lists configuration | No |
+| 2b | `02b-automation-lists.md` | Per-list automations | Yes (per list) |
 | 3 | `03-documents.md` | Documents | Yes |
 | 4 | `04-files.md` | File attachments | Yes |
-| 5 | `05-automations.md` | Automation rules | Yes |
+| 5 | `05-automations.md` | Global automation rules | Yes |
 | 6 | `06-chat-agents.md` | AI chat agents | Yes |
 | 7 | `07-ai-workspaces.md` | AI workspaces | Yes |
 | 8 | `08-package.md` | Package & export | No |
@@ -188,6 +208,10 @@ Load `references/steps/08-package.md` → ZIP template → Delete state
 ## Quick Reference
 
 ```bash
+# Load helper functions (do this ONCE at the start)
+source scripts/template-helpers.sh
+init_step
+
 # Check progress
 cat .template-generator-state.json | jq '{currentStep, templateName, steps}'
 
@@ -195,12 +219,11 @@ cat .template-generator-state.json | jq '{currentStep, templateName, steps}'
 cat references/steps/02-lists.md
 
 # Skip a step
-jq '.steps["3_DOCUMENTS"].status = "skipped"' .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
+skip_state 3 "DOCUMENTS"
 
 # Validate state
 bash scripts/validate-state.sh
 ```
 
----
-
+**Helper functions:** `scripts/template-helpers.sh` (source once, use everywhere)
 **Data format reference:** `references/template-structure.md`

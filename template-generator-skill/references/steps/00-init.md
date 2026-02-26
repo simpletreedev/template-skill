@@ -25,39 +25,36 @@ Gather user requirements and explain the template structure in a friendly, non-t
 After gathering requirements, explain in friendly, non-technical way:
 
 ```
-Perfect! Let me explain what your template can include. Think of it like a toolkit - you can pick what you need:
+Perfect! Let me explain what your template will include. Think of it like a toolkit:
 
 📋 **Lists & Boards** - Like Trello boards or task lists
    → Track items through steps (To Do → Doing → Done)
    → Add details like priority, who's assigned, due date
+   → Add automations per list (e.g., auto-notify when item moves to specific stage)
    → Perfect for: tasks, bugs, features, candidates...
 
-📄 **Documents** - Wiki pages or guides
+📄 **Documents** - Wiki pages or guides (Optional)
    → Capture knowledge, processes, instructions
    → Great for: project docs, meeting notes, playbooks
 
-📁 **Files** - Attachments organized in folders
+📁 **Files** - Attachments organized in folders (Optional)
    → Store reports, templates, images, any resources
    → Keep everything organized and accessible
 
-⚙️ **Automations** - Smart rules that save time
+⚙️ **Automations** - Smart rules that save time (Optional)
    → Automatically do things when something happens
    → Examples: notify team when task is created, auto-assign based on priority
 
-🤖 **AI Chat Agents** - Smart assistants for your team
+🤖 **AI Chat Agents** - Smart assistants for your team (Optional)
    → AI helpers that understand your context
    → Can answer questions, summarize, help with tasks
 
-🧠 **AI Workspaces** - AI trained on your knowledge
+🧠 **AI Workspaces** - AI trained on your knowledge (Optional)
    → Teach AI about your processes and expertise
    → Get smarter help that understands your context
 
-You don't need all of these - we'll build only what makes sense for you!
-
-Which parts sound useful for your {template purpose}?
+We'll go through each part step by step. You can skip any optional parts if you don't need them!
 ```
-
-**Wait for user response** - let them ask questions, express preferences
 
 ---
 
