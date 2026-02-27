@@ -30,7 +30,7 @@ Type 'skip' to continue, or tell me what workspaces you need."
 ### 2. If User Skips
 
 ```bash
-skip_state 7 "AI_WORKSPACES"
+skip_state 7
 ```
 
 **Show skip prompt:**
@@ -144,7 +144,7 @@ add_to_index "${SLUG}" "claude-ws/_workspaces.json" "claude-ws-${WS_KEY}" "${NAM
 
 ```bash
 WS_COUNT=$(get_count "${SLUG}" "claude-ws/_workspaces.json" "workspaces")
-update_state 7 "AI_WORKSPACES" "claudeWorkspaces" ${WS_COUNT}
+update_state 7 "claudeWorkspaces" ${WS_COUNT}
 ```
 
 ---

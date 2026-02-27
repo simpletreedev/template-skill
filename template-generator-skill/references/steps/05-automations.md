@@ -30,7 +30,7 @@ Type 'skip' to continue, or tell me what automations you need."
 ### 2. If User Skips
 
 ```bash
-skip_state 5 "AUTOMATIONS"
+skip_state 5
 ```
 
 **Show skip prompt:**
@@ -124,7 +124,7 @@ add_to_index "${SLUG}" "flows/automations/_automations.json" "automation-${AUTO_
 
 ```bash
 AUTO_COUNT=$(get_count "${SLUG}" "flows/automations/_automations.json" "automations")
-update_state 5 "AUTOMATIONS" "automations" ${AUTO_COUNT}
+update_state 5 "automations" ${AUTO_COUNT}
 ```
 
 ---

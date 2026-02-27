@@ -30,7 +30,7 @@ Type 'skip' to continue, or tell me how many documents you need."
 ### 2. If User Skips
 
 ```bash
-skip_state 3 "DOCUMENTS"
+skip_state 3
 ```
 
 Show skip prompt and return control.
@@ -76,7 +76,7 @@ add_to_index "${SLUG}" "entities/documents/_documents.json" "doc-${DOC_KEY}" "{D
 
 ```bash
 DOC_COUNT=$(get_count "${SLUG}" "entities/documents/_documents.json" "documents")
-update_state 3 "DOCUMENTS" "documents" ${DOC_COUNT}
+update_state 3 "documents" ${DOC_COUNT}
 ```
 
 ---

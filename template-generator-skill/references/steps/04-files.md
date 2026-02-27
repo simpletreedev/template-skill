@@ -33,7 +33,7 @@ Type 'skip' to continue, or tell me what files you need."
 ### 2. If Skipped
 
 ```bash
-skip_state 4 "FILES"
+skip_state 4
 echo "╭──────────────────────────────────────╮"
 echo "│  📁 FILES STEP SKIPPED               │"
 echo "│  No document files added             │"

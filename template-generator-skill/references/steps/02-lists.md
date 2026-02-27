@@ -166,7 +166,7 @@ add_to_index "${SLUG}" "entities/lists/_lists.json" "list-${LIST_KEY}" "{List Na
 
 ```bash
 LIST_COUNT=$(get_count "${SLUG}" "entities/lists/_lists.json" "lists")
-update_state 2 "LISTS" "lists" ${LIST_COUNT}
+update_state 2 "lists" ${LIST_COUNT}
 ```
 
 ---

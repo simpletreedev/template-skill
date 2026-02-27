@@ -101,24 +101,13 @@ cd ..
 ```bash
 ZIP_FILE="${SLUG}-template.zip"
 
-# Get upload URL from environment or use default
-CLOUD_UPLOAD_URL=$(get_upload_url)
-
 # Upload to cloud server and get URL
-UPLOAD_RESPONSE=$(curl -s -X POST \
-  -F "file=@${ZIP_FILE}" \
-  "${CLOUD_UPLOAD_URL}")
+DOWNLOAD_URL=$(upload_to_cloud "${ZIP_FILE}")
 
-# Extract URL from JSON response
-DOWNLOAD_URL=$(echo ${UPLOAD_RESPONSE} | jq -r '.url')
-
-if [[ "${DOWNLOAD_URL}" != "null" && -n "${DOWNLOAD_URL}" ]]; then
+if [[ -n "${DOWNLOAD_URL}" && "${DOWNLOAD_URL}" != "null" ]]; then
   echo "✅ Upload successful! Cloud URL: ${DOWNLOAD_URL}"
 else
-  # Exit with error - don't continue
   echo "❌ Error: Failed to upload template to server"
-  echo "Server response: ${UPLOAD_RESPONSE}"
-  echo ""
   echo "Would you like me to try again? (say 'retry' to attempt upload again)"
   exit 1
 fi
@@ -188,7 +177,7 @@ rm .py* 2>/dev/null || true
 ### 7. Update State File (Final)
 
 ```bash
-update_state 8 "PACKAGE" "dummy" 0
+update_state 8 "dummy" 0
 ```
 
 Then delete state file (already done in cleanup step).

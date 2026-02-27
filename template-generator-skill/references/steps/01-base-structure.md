@@ -75,7 +75,7 @@ EOF
 ### 4. Update State File
 
 ```bash
-update_state 1 "BASE_STRUCTURE" "dummy" 0
+update_state 1 "dummy" 0
 ```
 
 ---

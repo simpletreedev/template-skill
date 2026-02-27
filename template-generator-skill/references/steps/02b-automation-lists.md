@@ -256,7 +256,7 @@ Add more automations to this list?
 create_automation() {
   local LIST_KEY="$1"
   local AUTOMATION_ID="$2"
-  local SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
+  local SLUG=$(get_slug)
 
   mkdir -p "template-${SLUG}/entities/lists/data/${LIST_KEY}"
 
@@ -567,7 +567,7 @@ Add more automations to this list?
 ```bash
 create_automation_file() {
   local LIST_KEY="$1"
-  local SLUG=$(jq -r '.templateSlug' .template-generator-state.json)
+  local SLUG=$(get_slug)
 
   # Read all automations from user input and build JSON array
   cat > "template-${SLUG}/entities/lists/data/${LIST_KEY}/automation.json" << EOF

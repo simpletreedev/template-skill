@@ -18,6 +18,8 @@ Gather user requirements and explain the template structure in a friendly, non-t
 
 **Important:** Use simple language, be conversational, focus on understanding - NOT technical details, DON'T ask about data structure and format output.
 
+**⚠️ DO NOT load any scripts in this step** - That happens in step 1.
+
 ---
 
 ### 2. Explain Template Structure (Simple Terms)
@@ -60,39 +62,8 @@ We'll go through each part step by step. You can skip any optional parts if you 
 
 ### 3. Create State File
 
-Create `.template-generator-state.json`:
-
 ```bash
-cat > .template-generator-state.json << 'EOF'
-{
-  "version": "1.0",
-  "currentStep": 0,
-  "totalSteps": 8,
-  "templateSlug": "{slug-from-name}",
-  "templateName": "{Template Name}",
-  "startedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "lastUpdated": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "steps": {
-    "0_INIT": { "status": "completed" },
-    "1_BASE_STRUCTURE": { "status": "pending" },
-    "2_LISTS": { "status": "pending" },
-    "3_DOCUMENTS": { "status": "pending" },
-    "4_FILES": { "status": "pending" },
-    "5_AUTOMATIONS": { "status": "pending" },
-    "6_CHAT_AGENTS": { "status": "pending" },
-    "7_AI_WORKSPACES": { "status": "pending" },
-    "8_PACKAGE": { "status": "pending" }
-  },
-  "summary": {
-    "lists": 0,
-    "documents": 0,
-    "files": 0,
-    "automations": 0,
-    "chatAgents": 0,
-    "claudeWorkspaces": 0
-  }
-}
-EOF
+python3 scripts/template-manager.py init "{slug}" "{Template Name}" "{Description}"
 ```
 
 ---

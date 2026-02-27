@@ -61,23 +61,10 @@ template-generator-skill/
 ```json
 {
   "version": "1.0",
-  "currentStep": 0,
-  "totalSteps": 8,
-  "templateSlug": "project-management",
-  "templateName": "Project Management Template",
-  "startedAt": "2026-02-24T10:00:00Z",
-  "lastUpdated": "2026-02-24T10:15:00Z",
-  "steps": {
-    "0_INIT": { "status": "completed" },
-    "1_BASE_STRUCTURE": { "status": "pending" },
-    "2_LISTS": { "status": "pending" },
-    "3_DOCUMENTS": { "status": "pending" },
-    "4_FILES": { "status": "pending" },
-    "5_AUTOMATIONS": { "status": "pending" },
-    "6_CHAT_AGENTS": { "status": "pending" },
-    "7_AI_WORKSPACES": { "status": "pending" },
-    "8_PACKAGE": { "status": "pending" }
-  },
+  "step": 0,
+  "slug": "project-management",
+  "name": "Project Management Template",
+  "description": "Template for managing projects",
   "summary": {
     "lists": 0,
     "documents": 0,
@@ -89,15 +76,13 @@ template-generator-skill/
 }
 ```
 
-**Status values:** `pending` | `in_progress` | `completed` | `skipped`
-
 ### State Operations
 
 **START:**
 ```bash
 if [[ -f .template-generator-state.json ]]; then
-  cat .template-generator-state.json | jq '{currentStep, templateName, steps}'
-  echo "Continue from where we left off? (yes/progress)"
+  get_progress_json
+  echo "Continue from step $(get_state_val 'step')? (yes/progress)"
 fi
 ```
 
@@ -107,20 +92,17 @@ fi
 init_step
 
 # Update state after completion
-update_state N "NAME" "key" COUNT
+update_state N "key" COUNT
 
 # OR if skipping:
-skip_state N "NAME"
+skip_state N
 ```
 
 **PROGRESS OVERVIEW:**
 ```
-📋 Template: {templateName}
-📍 Current: STEP {currentStep}/8
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Completed steps...
-🔄 Current step...
-⏳ Pending steps...
+📋 Template: {name}
+📍 Current: STEP {step}/8
+📊 Summary: {summary}
 ```
 
 ---
@@ -214,17 +196,18 @@ source scripts/template-helpers.sh
 init_step
 
 # Check progress
-cat .template-generator-state.json | jq '{currentStep, templateName, steps}'
+get_progress_json
 
 # Load specific step
 cat references/steps/02-lists.md
 
 # Skip a step
-skip_state 3 "DOCUMENTS"
+skip_state 3
 
 # Validate state
 bash scripts/validate-state.sh
 ```
 
 **Helper functions:** `scripts/template-helpers.sh` (source once, use everywhere)
+**Template manager:** `scripts/template-manager.py` (Python unified script)
 **Data format reference:** `references/template-structure.md`

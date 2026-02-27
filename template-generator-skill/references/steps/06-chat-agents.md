@@ -30,7 +30,7 @@ Type 'skip' to continue, or tell me what agents you need."
 ### 2. If User Skips
 
 ```bash
-skip_state 6 "CHAT_AGENTS"
+skip_state 6
 ```
 
 **Show skip prompt:**
@@ -154,7 +154,7 @@ add_agent_to_index "${SLUG}" "flows/chat-agents/_agents.json" "agent-${AGENT_KEY
 
 ```bash
 AGENT_COUNT=$(get_count "${SLUG}" "flows/chat-agents/_agents.json" "agents")
-update_state 6 "CHAT_AGENTS" "chatAgents" ${AGENT_COUNT}
+update_state 6 "chatAgents" ${AGENT_COUNT}
 ```
 
 ---
