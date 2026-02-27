@@ -202,6 +202,7 @@ Load `references/steps/08-package.md` → ZIP template → Delete state
 - ❌ Skip steps without asking user
 - ❌ Run multiple steps at once
 - ❌ Assume state - always read from file
+- ❌ Ask about format output template.
 
 ---
 

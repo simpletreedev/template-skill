@@ -52,7 +52,7 @@ templates/
 │       ├── _agents.json                             # Metadata for all chat-agents
 │       └── data/                                    # Data folders for each agent
 │           ├── agent-1/
-│           │   └── data.json                        # {flowId, name, claudeWs?, agentPrompt?, commands[]}
+│           │   └── data.json                        # {flowId, flow, name, claudeWs?, agentPrompt?, commands[]}
 │           ├── agent-2/
 │           │   └── data.json
 │           └── ...
@@ -110,7 +110,7 @@ templates/
 
 ---
 
-### entities/lists/_lists.json
+### entities/lists/\_lists.json
 
 ```json
 {
@@ -136,7 +136,7 @@ templates/
 
 ---
 
-### entities/documents/_documents.json
+### entities/documents/\_documents.json
 
 ```json
 {
@@ -162,7 +162,7 @@ templates/
 
 ---
 
-### entities/files/_manifest.json
+### entities/files/\_manifest.json
 
 ```json
 {
@@ -194,7 +194,7 @@ templates/
 
 ---
 
-### flows/automations/_automations.json
+### flows/automations/\_automations.json
 
 ```json
 {
@@ -222,7 +222,7 @@ templates/
 
 ---
 
-### flows/chat-agents/_agents.json
+### flows/chat-agents/\_agents.json
 
 ```json
 {
@@ -250,7 +250,7 @@ templates/
 
 ---
 
-### claude-ws/_workspaces.json
+### claude-ws/\_workspaces.json
 
 ```json
 {
@@ -295,7 +295,12 @@ templates/
       "type": "SELECT",
       "options": [
         { "key": "pri_high", "value": "High", "color": "#FF4444", "order": 1 },
-        { "key": "pri_medium", "value": "Medium", "color": "#FFB800", "order": 2 },
+        {
+          "key": "pri_medium",
+          "value": "Medium",
+          "color": "#FFB800",
+          "order": 2
+        },
         { "key": "pri_low", "value": "Low", "color": "#00D449", "order": 3 }
       ],
       "order": 1
@@ -308,8 +313,18 @@ templates/
     }
   ],
   "stages": [
-    { "key": "stage_backlog", "name": "Backlog", "order": 1, "color": "#8B8B8B" },
-    { "key": "stage_in_progress", "name": "In Progress", "order": 2, "color": "#FFB800" },
+    {
+      "key": "stage_backlog",
+      "name": "Backlog",
+      "order": 1,
+      "color": "#8B8B8B"
+    },
+    {
+      "key": "stage_in_progress",
+      "name": "In Progress",
+      "order": 2,
+      "color": "#FFB800"
+    },
     { "key": "stage_review", "name": "Review", "order": 3, "color": "#C377E0" },
     { "key": "stage_done", "name": "Done", "order": 4, "color": "#61BD4F" }
   ],
@@ -321,9 +336,7 @@ templates/
       "listKey": "list-project-tasks",
       "stageKey": "stage_done",
       "order": 1,
-      "customFields": [
-        { "fieldId": "field_priority", "value": "pri_high" }
-      ]
+      "customFields": [{ "fieldId": "field_priority", "value": "pri_high" }]
     }
   ]
 }
@@ -375,6 +388,62 @@ templates/
 {
   "flowId": "flow-project-assistant",
   "name": "Project Assistant",
+  "flow": {
+    "nodes": [
+      {
+        "index": 1,
+        "typeId": 1,
+        "inputs": {
+          "formInputTypes": [
+            {
+              "type": "string",
+              "label": "Item ID",
+              "name": "itemId"
+            },
+            {
+              "type": "string",
+              "label": "API Base URL",
+              "name": "apiUrl"
+            }
+          ]
+        }
+      },
+      {
+        "index": 2,
+        "typeId": 9,
+        "inputs": {
+          "method": "GET",
+          "url": "$form.apiUrl",
+          "headers": "{\"Accept\": \"application/json\"}"
+        }
+      },
+      {
+        "index": 3,
+        "typeId": 2,
+        "inputs": {
+          "agentModel": "chatOpenAI",
+          "agentMessages": [
+            {
+              "role": "system",
+              "content": "You are an expert data analyst. Your task is to analyze item information and generate a comprehensive report with insights, key findings, and recommendations. Format the report in a clear, professional manner with sections for Overview, Details, Analysis, and Insights."
+            },
+            {
+              "role": "user",
+              "content": "Analyze this item data and generate a detailed report:\n\nItem ID: $form.itemId\n\nData: $2\n\nPlease provide a comprehensive analysis including:\n1. Item Overview\n2. Key Details\n3. Data Analysis\n4. Insights & Recommendations"
+            }
+          ]
+        }
+      },
+      {
+        "index": 4,
+        "typeId": 4,
+        "inputs": {
+          "message": "Report generated successfully!"
+        }
+      }
+    ],
+    "edges": ["1-2", "2-3", "3-4"]
+  },
   "description": "AI assistant for project management questions",
   "claudeWs": "claude-ws-1",
   "agentPrompt": "project-assistant.md",
@@ -395,7 +464,7 @@ templates/
 
 ---
 
-### claude-ws/data/{ws-slug}/_config.json
+### claude-ws/data/{ws-slug}/\_config.json
 
 ```json
 {
@@ -557,7 +626,7 @@ When importing files from template:
 - **Human-readable**: Easy to navigate and understand template contents
 - **No need for separate folder metadata**: Folder names are self-describing
 
-### Why _manifest.json for files?
+### Why \_manifest.json for files?
 
 - **Override capabilities**: Can set display_name different from filename
 - **Metadata**: is_embedded, descriptions, and other file-specific settings

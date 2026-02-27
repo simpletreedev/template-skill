@@ -63,48 +63,75 @@ Your call! 🧠
 
 ---
 
-### 4. Create Agent Flow Using flow-generator-skill
+### 4. Create Agent Flow Using flow skill
 
-**IMPORTANT:** Use the `flow-generator-skill` to create agent flow JSON.
+**IMPORTANT: Always use the `flow` skill to generate agent flow JSON.**
 
-```bash
-# Invoke flow-generator-skill
-SKILL="flow" PROMPT="create agent flow for {Agent Name} with description: {description}" \
-  WORKSPACE="{claudeWs}" COMMANDS="{comma-separated list of /commands}"
+**Step 4a: Invoke flow skill**
+
+Use the Skill tool to call the flow skill:
+
+```
+flow skill: create agent flow for {Agent Name}
+
+Context:
+- Agent role: {role from step 3}
+- Description: {what it helps with from step 3}
+- AI workspace: {workspace key from step 3}
+- Slash commands: {commands from step 3}
+
+Example:
+"create agent flow for Project Assistant that helps with project management,
+uses claude-ws-1, with commands /summary and /tasks"
 ```
 
-The flow-generator-skill will:
-1. Clarify requirements (if needed)
-2. Generate proper flow JSON with nodes and edges
-3. Return formatted JSON compatible with Flowise Agent Flow
+**The flow skill will:**
+1. Ask clarifying questions (if needed)
+2. Generate proper flow JSON with `nodes[]` and `edges[]`
+3. Return the complete flow structure
 
-**Save the output:**
+**Step 4b: Save the output**
+
 ```bash
 AGENT_KEY="{agent-key}"
+AGENT_NAME="{Agent Name}"
+AGENT_DESC="{Agent Description}"
+WS_KEY="{workspace-key}"
+COMMANDS="{commands from step 3}"
 
 ensure_dir "template-${SLUG}/flows/chat-agents/data/${AGENT_KEY}"
 
-# Save flow JSON returned by flow-generator-skill
-cat > template-${SLUG}/flows/chat-agents/data/${AGENT_KEY}/data.json << 'EOF'
+# Create data.json with flow from flow skill
+cat > template-${SLUG}/flows/chat-agents/data/${AGENT_KEY}/data.json << EOF
 {
   "flowId": "flow-${AGENT_KEY}",
-  "flow": { /* flow JSON from flow-generator-skill */ },
-  "name": "{Agent Name}",
-  "description": "{Agent Description}",
-  "claudeWs": "claude-ws-{key}",
+  "name": "${AGENT_NAME}",
+  "flow": $FLOW_JSON,
+  "description": "${AGENT_DESC}",
+  "claudeWs": "claude-ws-${WS_KEY}",
   "agentPrompt": "agent-${AGENT_KEY}.md",
   "commands": [
-    {
-      "name": "/{command}",
-      "description": "{What it does}",
-      "skill": "{command}.md"
-    }
+EOF
+
+# Add commands
+if [[ -n "${COMMANDS}" ]]; then
+  IFS=',' read -ra CMD_ARRAY <<< "${COMMANDS}"
+  for i in "${!CMD_ARRAY[@]}"; do
+    cmd="${CMD_ARRAY[$i]}"
+    cmd_name="${cmd#/}"
+    cat >> template-${SLUG}/flows/chat-agents/data/${AGENT_KEY}/data.json << EOF
+    {"name": "${cmd}", "description": "Execute ${cmd_name}", "skill": "${cmd_name}.md"}$(if [[ $i -lt $((${#CMD_ARRAY[@]} - 1)) ]]; then echo ","; fi)
+EOF
+  done
+fi
+
+cat >> template-${SLUG}/flows/chat-agents/data/${AGENT_KEY}/data.json << EOF
   ]
 }
 EOF
 ```
 
-**Note:** `claudeWs` must reference a workspace created in step 7 (AI Workspaces).
+**Where `$FLOW_JSON` is the output from flow skill (contains `{"nodes": [...], "edges": [...]}`).**
 
 ---
 
@@ -154,6 +181,54 @@ Your call! 🧠
 ```
 
 **⚠️ PAUSE HERE - WAIT FOR USER RESPONSE**
+
+---
+
+## Best Practices
+
+**AI MUST:**
+- ✅ Use flow skill for agent flow generation
+- ✅ Copy flow JSON output from flow skill exactly as returned
+
+**AI MUST NOT:**
+- ❌ Manually create or guess flow JSON structure
+- ❌ Generate flow JSON without using flow skill
+- ❌ Use other flow formats (e.g., id/type/position format)
+- ❌ Modify flow skill output format
+
+**⚠️ CRITICAL: Flow skill output format**
+
+**CORRECT (from flow skill):**
+```json
+{
+  "nodes": [
+    {"index": 1, "typeId": 1, "inputs": {...}},
+    {"index": 2, "typeId": 9, "inputs": {...}}
+  ],
+  "edges": ["1-2", "2-3"]
+}
+```
+
+**WRONG (other format):**
+```json
+{
+  "nodes": [
+    {"id": "input-node", "type": "textInput", "position": [...], "data": {...}},
+    {"id": "fetch-node", "type": "apiCall", "position": [...]}
+  ],
+  "edges": [
+    {"id": "e1", "source": "input-node", "target": "fetch-node"}
+  ]
+}
+```
+
+**The flow skill handles:**
+- Node types (typeId 1-29 mappings)
+- Edge connections ("1-2", "2-3" format)
+- Variable syntax (`$1`, `$2`, `$form`, `$flow.state`)
+- Proper Flowise Agent Flow structure
+
+**If flow skill is not available, skip chat agents or ask user to provide flow JSON.**
 
 ---
 
