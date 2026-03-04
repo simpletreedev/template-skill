@@ -61,17 +61,27 @@ templates/
 │   ├── _workspaces.json                             # Metadata for all workspaces
 │   └── data/                                        # Data folders for each workspace
 │       ├── claude-ws-1/
-│       │   ├── _config.json                         # {name, description, model?, temperature?, maxTokens?}
-│       │   ├── system-prompt.md
 │       │   ├── agents/                              # Agent prompt templates
-│       │   │   ├── agent-1.md
-│       │   │   └── agent-2.md
+│       │   │   ├── agent-1/
+│       │   │   │   └── prompts/
+│       │   │   │   └── templates/
+│       │   │   │   └── PROMPT.md
+│       │   │   └── agent-2/
+│       │   │       └── PROMPT.md
 │       │   ├── skills/                              # AI capabilities
-│       │   │   ├── skill-1.md
-│       │   │   └── skill-2.md
+│       │   │   ├── skill-1/
+│       │   │   │   ├── references/                  # Reference docs for this skill
+│       │   │   │   ├── scripts/                     # Helper scripts for this skill
+│       │   │   │   └── SKILL.md                     # Main skill file
+│       │   │   ├── skill-2/
+│       │   │   │   └── SKILL.md
+│       │   │   └── ...
 │       │   └── commands/                            # Slash command prompts
-│       │       ├── command-1.md
-│       │       └── command-2.md
+│       │       ├── command-1/
+│       │       │   └── COMMAND.md
+│       │       ├── command-2/
+│       │       │   └── COMMAND.md
+│       │       └── ...
 │       ├── claude-ws-2/
 │       │   └── ...
 │       └── ...
@@ -464,88 +474,6 @@ templates/
 
 ---
 
-### claude-ws/data/{ws-slug}/\_config.json
-
-```json
-{
-  "name": "Project AI Workspace",
-  "description": "AI workspace for project management tasks",
-  "model": "claude-3-5-sonnet",
-  "temperature": 0.7,
-  "maxTokens": 4096
-}
-```
-
----
-
-### claude-ws/data/{ws-slug}/system-prompt.md
-
-```markdown
-# System Prompt
-
-You are a helpful AI assistant for project management. Your role is to help users:
-
-1. Track and manage project tasks
-2. Provide insights on project progress
-3. Assist with sprint planning and retrospectives
-4. Answer questions about project documentation
-
-Always be concise, actionable, and friendly.
-```
-
----
-
-### claude-ws/data/{ws-slug}/agents/agent-1.md
-
-```markdown
-# Project Assistant Agent
-
-You are the Project Assistant. You help users with:
-
-- Task management and organization
-- Sprint planning
-- Progress tracking
-- Team coordination
-
-Be proactive in suggesting improvements and identifying potential issues.
-```
-
----
-
-### claude-ws/data/{ws-slug}/skills/skill-1.md
-
-```markdown
-# Task Analysis Skill
-
-When analyzing tasks, consider:
-
-1. **Priority**: Is this task urgent or important?
-2. **Dependencies**: Does this task depend on other tasks?
-3. **Effort**: How much work is required?
-4. **Assignee**: Who is best suited for this task?
-
-Provide a structured analysis with recommendations.
-```
-
----
-
-### claude-ws/data/{ws-slug}/commands/command-1.md
-
-```markdown
-# /summary Command
-
-Generate a concise project summary including:
-
-- Total tasks by stage (backlog, in progress, review, done)
-- High priority tasks
-- Upcoming deadlines
-- Blockers or risks
-
-Keep it under 200 words.
-```
-
----
-
 ## IMPORT LOGIC
 
 ### Files & Folders Import
@@ -596,8 +524,6 @@ When importing files from template:
 
 1. Parse `_workspaces.json` to get all workspace definitions
 2. For each workspace entry:
-   - Read `_config.json` for workspace settings
-   - Load `system-prompt.md` as base system prompt
    - Load all `.md` files from `agents/`, `skills/`, `commands/` directories
    - Register workspace context with AI server
 

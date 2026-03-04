@@ -8,39 +8,20 @@ Add document files to template using Claude's built-in skills (xlsx, docx, pdf).
 
 ## What To Do
 
-### 0. Initialize Step Variables
-
-```bash
-# Load common variables (helpers already loaded by SKILL.md)
-init_step
-# Now: SLUG, NAME, DESCRIPTION, TIMESTAMP are available
-```
-
----
-
 ### 1. Ask User
 
-"Do you need any **document files** in this template?
-I can generate:
-   📊 Excel files (.xlsx)
-   📄 Word files (.docx)
-   📋 PDF files (.pdf)
-
-Type 'skip' to continue, or tell me what files you need."
+Use `templates/common-user-prompts.md` → Files
 
 ---
 
-### 2. If Skipped
+### 2. If User Skips
 
 ```bash
 skip_state 4
-echo "╭──────────────────────────────────────╮"
-echo "│  📁 FILES STEP SKIPPED               │"
-echo "│  No document files added             │"
-echo "╰──────────────────────────────────────╯"
-read
-return 0
 ```
+
+**Show skip prompt:**
+Use `templates/common-responses.md` → Files
 
 ---
 
@@ -54,72 +35,101 @@ ensure_dir "${BASE_DIR}/documents"
 
 ---
 
-### 4. Ask User About Files
+### 4. For EACH File, Gather Requirements
 
-"What files do you need? Tell me:
-- File type (Excel/Word/PDF)
-- File name and location
-- Content/data
+**Ask user:**
 
-Or say 'samples' to generate example files (budget.xlsx, guide.docx, summary.pdf)."
+```
+What file do you need?
+
+Tell me:
+
+**1. File type** - Excel, Word, or PDF?
+**2. File name** - What should it be called?
+**3. Purpose** - What will this file be used for?
+**4. Content** - What data/information should be included?
+
+Or say 'samples' if you want me to create some example files to get you started.
+```
+
+**Gather information FIRST, don't create anything yet.**
 
 ---
 
-### 5. Generate Files Using Skills
+### 5. Show Preview (BEFORE Creating)
+
+```
+Perfect! Here's what I'll create:
+
+📄 **{File Name}** ({type})
+   Location: {reports/documents}/
+   Purpose: {purpose}
+
+   Content preview:
+   {Summary of what will be included}
+
+This file will {benefit/use case}.
+
+Ready to create this file? (say **"yes"** to proceed)
+```
+
+---
+
+### 6. Generate Files Using Skills
 
 #### Excel (.xlsx) - Use xlsx skill
+
 ```
-"Create ${BASE_DIR}/reports/budget.xlsx:
-Title: Campaign Budget Tracker
-Columns: Campaign, Category, Budget, Spent, Remaining
+Create ${BASE_DIR}/reports/{filename}.xlsx:
+Title: {Sheet Title}
+Columns: {col1}, {col2}, {col3}, ...
 Rows:
-- Summer Sale, Social Media, 5000, 3200, 1800
-- Q2 Launch, Email Marketing, 3000, 2800, 200
-- Brand Awareness, PPC Ads, 8000, 6500, 1500"
+- {row1 data}
+- {row2 data}
 ```
 
 #### Word (.docx) - Use docx skill
+
 ```
-"Create ${BASE_DIR}/documents/guide.docx:
-Title: User Guide
-Section: Introduction - Welcome to the template
-Section: Getting Started - 3 bullet points: Configure settings, Add campaigns, Track performance
-Section: Tips - Update budget regularly, Review weekly, Use automations"
+Create ${BASE_DIR}/documents/{filename}.docx:
+Title: {Document Title}
+Section: {Section Name} - {Content}
+Section: {Section Name} - {Content}
 ```
 
 #### PDF (.pdf) - Use pdf skill
+
 ```
-"Create ${BASE_DIR}/reports/summary.pdf:
-Title: Campaign Summary Report
-Section: Overview - Total campaigns: 3, Budget: $16,000, Spent: $12,500
-Section: Top Performers - Summer Sale (64% utilized), Brand Awareness (81% utilized)
-Section: Recommendations - Continue investing in Social Media, Optimize PPC spend"
+Create ${BASE_DIR}/reports/{filename}.pdf:
+Title: {Document Title}
+Section: {Section Name} - {Content}
+Section: {Section Name} - {Content}
 ```
 
 #### Optional: CSV/MD/TXT (only if user requests)
+
 ```bash
 # CSV (if requested)
 cat > "${BASE_DIR}/exports/data.csv" << 'EOF'
-Campaign,Category,Budget,Spent
-Summer Sale,Social Media,5000,3200
+Column1,Column2,Column3
+value1,value2,value3
 EOF
 
 # Markdown (if requested)
 cat > "${BASE_DIR}/documents/README.md" << 'EOF'
-# Template Name
+# {Title}
 
 ## Overview
-Template description here.
+{Content}
 
-## Features
-- Feature 1
-- Feature 2
+## Details
+{More content}
 EOF
 ```
 
 ---
 
-### 6. Update _manifest.json
+### 7. Update \_manifest.json
 
 ```bash
 FILE_COUNT=$(find "${BASE_DIR}" -type f | wc -l)
@@ -138,54 +148,47 @@ done | sed '$ s/,$//')
   }
 }
 EOF
-
-echo "✓ Manifest updated with ${FILE_COUNT} files"
 ```
 
 ---
 
-### 7. Update State & PAUSE
+### 8. Update State & Show Completion
 
 ```bash
-jq --argjson count ${FILE_COUNT} \
-   '.steps["4_FILES"].status = "completed" | .summary.files = $count | .lastUpdated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' \
-   .template-generator-state.json > .tmp && mv .tmp .template-generator-state.json
-
-echo ""
-echo "╭──────────────────────────────────────────╮"
-echo "│  ✅ FILES STEP COMPLETED                 │"
-echo "╜──────────────────────────────────────────╤"
-echo "│  Files created: ${FILE_COUNT}             │"
-echo "│  📁 Location: entities/files/storage/    │"
-echo "│                                          │"
-echo "│  Press Enter to continue...              │"
-echo "╰──────────────────────────────────────────╯"
-echo ""
-read
+update_step_state 4 "files" "entities/files/_manifest.json"
 ```
+
+**Show completion prompt:**
+Use `templates/common-responses.md` → Files
 
 ---
 
 ## Notes
 
 **Priority Files (always offer first):**
+
 - ✅ Excel (.xlsx) - For data tables, budgets, trackers
 - ✅ Word (.docx) - For documents, guides, reports
 - ✅ PDF (.pdf) - For finalized reports, summaries
 
 **Optional Files (only if requested):**
+
 - CSV - Simple data export
 - Markdown - Documentation
 - Text - Plain notes
 
 **Best Practices:**
+
 - Use Claude skills (xlsx, docx, pdf) for best results
 - Only create CSV/MD/TXT if user explicitly requests
-- Always update _manifest.json with created files
+- Always update \_manifest.json with created files
 - Keep file sizes reasonable (< 10MB each)
 
 ---
 
 ## Return Control
 
-Return to main orchestrator → next step: `05-automations.md`
+After user says "continue", return to main orchestrator.
+Main orchestrator will load next step: `05-automations.md`
+
+If user says "skip", this is already handled above.

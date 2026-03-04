@@ -8,22 +8,9 @@ Configure automation rules (smart rules: "when X happens, do Y").
 
 ## What To Do
 
-### 0. Initialize Step Variables
-
-```bash
-# Load common variables (helpers already loaded by SKILL.md)
-init_step
-# Now: SLUG, NAME, DESCRIPTION, TIMESTAMP are available
-```
-
----
-
 ### 1. Ask User
 
-"Do you need any **automations** in this template?
-Automations trigger actions based on events (e.g., notify on task created).
-
-Type 'skip' to continue, or tell me what automations you need."
+Use `templates/common-user-prompts.md` → Automations
 
 ---
 
@@ -34,35 +21,64 @@ skip_state 5
 ```
 
 **Show skip prompt:**
-
-```
-⏭️  Skipping automations
-
-📊 Progress:
-   • Automations: skipped
-
-📍 What's next: Chat Agents (optional)
-
-What's next?
-• Continue to chat agents? (say "continue")
-• See detailed progress? (say "progress")
-
-Your call! 🤖
-```
-
-**⚠️ PAUSE HERE - WAIT FOR USER RESPONSE**
+Use `templates/common-responses.md` → Automations
 
 ---
 
-### 3. For EACH Automation, Ask
+### 3. For EACH Automation, Gather Requirements
 
-- "When should this trigger? (e.g., when task is created, updated, moved)"
-- "What should happen? (e.g., send notification, update field, call AI)"
-- "Should it use AI workspace? (optional)"
+**Ask user:**
+
+```
+Let's create your automation: **{Automation Name}**
+
+I need to know:
+
+1. **When should this trigger?**
+   Examples:
+   - When a new item is created
+   - When an item is updated
+   - When an item moves to a specific stage
+   - On a schedule (daily, weekly, etc.)
+
+2. **What should happen?**
+   Examples:
+   - Send notification to someone
+   - Update a field value
+   - Call an AI workspace to process it
+   - Create a follow-up item
+
+3. **Any conditions?** (optional)
+   Examples:
+   - Only if priority is high
+   - Only if assigned to specific person
+   - Only if stage is "Review"
+
+Tell me about this automation and I'll put it together for you.
+```
+
+**Gather information FIRST, don't create anything yet.**
 
 ---
 
-### 4. Create Automation Data File
+### 4. Show Preview (BEFORE Creating)
+
+```
+Perfect! Here's what I'll create:
+
+⚙️ **{Automation Name}**
+   Trigger: {When it happens}
+   Action: {What it does}
+   Condition: {Any conditions (if applicable)}
+
+This automation will {benefit/use case}.
+
+Ready to create this automation? (say **"yes"** to proceed)
+```
+
+---
+
+### 5. Create Automation Data File
 
 For each automation, create:
 
@@ -78,13 +94,20 @@ cat > template-${SLUG}/flows/automations/data/${AUTO_KEY}/data.json << 'EOF'
   "triggers": [
     {
       "type": "item_created|item_updated|item_moved|schedule",
-      "listKey": "list-{key}"
+      "listKey": "list-{key}",
+      "stageKey": "stage-{key}",
+      "schedule": "0 9 * * 1"
     }
   ],
   "actions": [
     {
-      "type": "send_notification|update_field|call_ai",
-      "message": "{{item.title}}"
+      "type": "send_notification|update_field|call_ai|create_item",
+      "message": "{{item.title}}",
+      "fieldKey": "{field_key}",
+      "value": "{value}",
+      "claudeWs": "claude-ws-{key}",
+      "targetList": "list-{key}",
+      "targetStage": "stage-{key}"
     }
   ],
   "claudeWs": "claude-ws-{key}",
@@ -94,19 +117,52 @@ EOF
 ```
 
 **Trigger types:**
+
 - `item_created` - When a new item is added
 - `item_updated` - When an item is modified
 - `item_moved` - When an item changes stage
-- `schedule` - On a time schedule
+- `schedule` - On a time schedule (cron: "0 9 \* \* 1" = 9am every Monday)
 
 **Action types:**
+
 - `send_notification` - Send notification to users
 - `update_field` - Update a field value
 - `call_ai` - Trigger AI workspace
+- `create_item` - Create a new item
+
+**Examples:**
+
+```json
+// Notify when item moves to Review stage
+{
+  "name": "Notify on Review",
+  "triggers": [
+    { "type": "item_moved", "listKey": "list-tasks", "stageKey": "stage_review" }
+  ],
+  "actions": [
+    { "type": "send_notification", "message": "{{item.title}} is ready for review" }
+  ]
+}
+
+// Auto-assign high priority items
+{
+  "name": "Auto-assign High Priority",
+  "triggers": [
+    { "type": "item_created", "listKey": "list-tasks" }
+  ],
+  "actions": [
+    { "type": "update_field", "fieldKey": "assignee", "value": "team-lead" }
+  ],
+  "condition": {
+    "fieldKey": "priority",
+    "value": "high"
+  }
+}
+```
 
 ---
 
-### 5. Update _automations.json
+### 6. Update \_automations.json
 
 ```bash
 AUTO_KEY="{auto-key}"
@@ -118,39 +174,14 @@ add_to_index "${SLUG}" "flows/automations/_automations.json" "automation-${AUTO_
 
 ---
 
-### 6. Update State File
-
-**CRITICAL: Update state after completing automations:**
+### 7. Update State & Show Completion
 
 ```bash
-AUTO_COUNT=$(get_count "${SLUG}" "flows/automations/_automations.json" "automations")
-update_state 5 "automations" ${AUTO_COUNT}
+update_step_state 5 "automations" "flows/automations/_automations.json"
 ```
 
----
-
-### 7. Show PAUSE Prompt
-
-```
-✅ Automations configured!
-
-📊 We've added:
-   • {count} automation rules
-
-📍 What's next: Chat Agents (optional)
-   Chat agents are AI assistants for specific tasks.
-   Also optional - only if you need AI helpers.
-
-What's next?
-• Add chat agents? (say "continue" or tell me how many)
-• Skip chat agents? (say "skip")
-• Go back and change automations? (say "go back")
-• See detailed progress? (say "progress")
-
-Your call! 🤖
-```
-
-**⚠️ PAUSE HERE - WAIT FOR USER RESPONSE**
+**Show completion prompt:**
+Use `templates/common-responses.md` → Automations
 
 ---
 

@@ -2,45 +2,96 @@
 
 ## Purpose
 
-Configure lists (like Trello boards) with custom fields and workflow stages.
+Configure lists with custom fields and workflow stages.
 
 ---
 
 ## What To Do
 
-### 0. Initialize Step Variables
+### 1. Ask About Lists
 
-```bash
-# Load common variables (helpers already loaded by SKILL.md)
-init_step
-# Now: SLUG, NAME, DESCRIPTION, TIMESTAMP are available
+```
+How many lists do you need in this template?
+
+I recommend:
+
+{Show 2-3 relevant options based on their domain}
+
+• Option 1: {Brief description} - {Why it's good}
+
+• Option 2: {Brief description} - {Why it's good}
+
+• Option 3: {Brief description} - {Why it's good}
+
+What works best for you? Or tell me if you have a different setup in mind!
+```
+
+**DO NOT proceed to step 2 until you have:**
+
+- Exact number of lists
+- Name of EACH list
+
+---
+
+### 2. For EACH List, Gather Requirements
+
+**Ask user:**
+
+**CRITICAL: Follow the EXACT format below.**
+
+```
+Great! Let's set up your **{List Name}**
+
+I need to know:
+
+**1. What information do you want to track?**
+
+   Examples: Title, Priority, Who's assigned, Due date, Status, Tags...
+
+**2. What are the steps in your workflow?**
+
+   Examples: Backlog → In Progress → Review → Done
+
+**3. Do you want some example items?**
+
+   These help users understand how to use the template
+
+📝 What would you like to start with? (or say **"you decide"** to let me design the best setup)
+```
+
+**Gather information FIRST, don't create anything yet.**
+
+---
+
+### 3. Show Preview (BEFORE Creating)
+
+```
+Perfect! Here's what I'll create for **{List Name}**:
+
+📋 Fields ({count}):
+
+   • {Field 1} ({type})
+   • {Field 2} ({type})
+   • ...
+
+🔄 Workflow Stages ({count}):
+
+   {Stage 1} → {Stage 2} → {Stage 3} → ...
+
+📝 Example Items ({count}):
+
+   • {Item 1} ({stage})
+   • {Item 2} ({stage})
+   • ...
+
+This will let you track {what they want to track} through {workflow description}.
+
+👉 Ready to create this list? (say **"yes"** to proceed)
 ```
 
 ---
 
-### 1. Ask About Lists
-
-"How many lists do you need in this template?
-(e.g., 'Tasks' list, 'Bugs' list, 'Sprint Backlog' list - or just 1 list is fine too)"
-
----
-
-### 2. For EACH List, Ask:
-
-"Great! Let's set up your **{List Name}**
-
-1. **What information do you want to track?** (e.g., Title, Priority, Who's assigned, Due date)
-   - For each detail, I'll ask: name, type (text/select/date/number/etc), required?
-
-2. **What are the steps in your workflow?** (e.g., Backlog → In Progress → Review → Done)
-   - For each step: name, color
-
-3. **Do you need some items for each step?**
-   - For each item: name, description, which stage it belongs to (stageKey), any custom field values
-
----
-
-### 3. Create List Data File
+### 4. Create List Data File
 
 **IMPORTANT: Structure**
 
@@ -152,7 +203,7 @@ EOF
 
 ---
 
-### 4. Update \_lists.json
+### 5. Update \_lists.json
 
 ```bash
 LIST_KEY="{list-key}"
@@ -162,25 +213,17 @@ add_to_index "${SLUG}" "entities/lists/_lists.json" "list-${LIST_KEY}" "{List Na
 
 ---
 
-### 5. Update State File
+### 6. Show Success & Ask About Automations
 
-```bash
-LIST_COUNT=$(get_count "${SLUG}" "entities/lists/_lists.json" "lists")
-update_state 2 "lists" ${LIST_COUNT}
-```
-
----
-
-### 6. Ask About Automations (Per List)
-
-**IMPORTANT:** After completing EACH list configuration, ask:
+**After EACH list is created:**
 
 ```
-✅ **{List Name}** configured!
+✅ **{List Name}** created!
 
 Would you like to add **automations** to this list?
 
 Automations can:
+
 🔔 Send notifications when items are created/updated
 📧 Send emails when items move to specific stages
 ✅ Auto-assign tasks based on conditions
@@ -188,42 +231,44 @@ Automations can:
 🔄 Move items between stages automatically
 
 What would you like?
-• Add automations → say "add automations" or describe what you want
-• Continue without automations → say "continue" or "skip"
+
+• Add automations? (say "continue" or describe what you want)
+• Skip for now (say "skip")
 ```
 
-If user says "add automations":
+If user says "continue":
+
 ```bash
 cat references/steps/02b-automation-lists.md
 ```
 
 ---
 
-### 7. After All Lists Complete
+### 7. After Completion
+
+```bash
+LIST_COUNT=$(get_count "${SLUG}" "entities/lists/_lists.json" "lists")
+update_state 2 "lists" ${LIST_COUNT}
+```
+
+**Show completion prompt:**
 
 ```
 ✅ Awesome! Your lists are all set up.
 
 📊 We've created:
+
    • {count} lists: {list names}
    • {total_fields} custom fields
    • {total_stages} workflow stages
    • {total_items} example items
 
 📍 What's next: Documents (optional)
-   Documents are like wiki pages - great for guides, meeting notes, process docs.
-   Totally optional if you don't need them.
+   Great for guides, meeting notes, process docs.
 
-What would you like to do?
-• Add documents to your template? (say "continue" or tell me how many)
-• Skip documents and move on? (say "skip")
-• Go back and change the lists? (say "go back")
-• See an example of what documents look like? (say "tell me more")
-
-Your call! 📝
+👉 Continue to add documents
+⏭️ Skip documents
 ```
-
-**⚠️ PAUSE HERE - WAIT FOR USER RESPONSE**
 
 ---
 

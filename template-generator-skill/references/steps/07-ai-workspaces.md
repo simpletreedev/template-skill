@@ -2,9 +2,9 @@
 
 ## Purpose
 
-Configure AI workspaces with custom skills, commands, and agents for existing ClaudeWS servers.
+Add skills, commands, and agents to existing ClaudeWS servers.
 
-**⚠️ IMPORTANT:** This step does NOT create new ClaudeWS servers. It only adds content (skills, commands, agents) to servers you already have configured.
+**⚠️ IMPORTANT:** This step does NOT create new ClaudeWS servers. It only adds content to servers you already have configured.
 
 ---
 
@@ -13,32 +13,22 @@ Configure AI workspaces with custom skills, commands, and agents for existing Cl
 ### 1. Check ClaudeWS Servers
 
 ```bash
-# Check if user has ClaudeWS servers configured
-# Note: check_claudews_servers auto-loads .env file
+# Get list of ClaudeWS servers (cached for 5 seconds)
 SERVERS_JSON=$(check_claudews_servers)
 
-# Validate that we got valid JSON
+# Count servers using helper function
 if [[ -z "${SERVERS_JSON}" ]] || [[ "${SERVERS_JSON}" == "Error:"* ]]; then
-  HAS_ERROR=1
+  SERVER_COUNT=0
 else
-  HAS_ERROR=0
-  # Count servers using Python
-  SERVER_COUNT=$(python3 -c "import sys, json; print(len(json.load(sys.stdin)))" <<< "$SERVERS_JSON")
-fi
-
-# Check if we have any servers
-if [[ ${HAS_ERROR} -eq 1 ]] || [[ ${SERVER_COUNT} -eq 0 ]]; then
-  HAS_SERVERS=0
-else
-  HAS_SERVERS=1
+  SERVER_COUNT=$(get_claudews_server_count "$SERVERS_JSON")
 fi
 ```
 
 ---
 
-### 2. If No Servers - Inform User
+### 2. Ask User (Based on Server Availability)
 
-**⚠️ IMPORTANT: If HAS_SERVERS=0, show this message to user and ASK what they want to do:**
+**If SERVER_COUNT = 0:**
 
 ```
 ⚠️ No ClaudeWS servers found
@@ -48,121 +38,96 @@ AI Workspaces require ClaudeWS servers to be configured first.
 To set up servers:
   1. Go to PrivOs settings
   2. Configure at least one ClaudeWS server
-  3. Add PRIVOS_API_URL to .env file in this skill directory
+  3. Add PRIVOS_API_URL to .env file
 
 What would you like to do?
 👉 Configure servers now and continue
 ⏭️ Skip this step for now
 ```
 
-**If user wants to skip:**
-
-```bash
-skip_state 7
-```
-
-**Then show skip prompt:**
-
-```
-⏭️ AI Workspaces skipped
-
-📍 What's next: Package & Export (final step)
-   Package everything into a ZIP file ready for import.
-
-👉 Continue to package
-```
-
-**⚠️ CRITICAL: The code below (steps 3+) only runs if HAS_SERVERS=1**
-
----
-
-### 3. Show Available Servers
-
-```bash
-# Display server summary (show name, not ID)
-echo "🔧 Available ClaudeWS Servers:"
-python3 -c "import sys, json; servers = json.load(sys.stdin); [print(f'  • {s.get(\"name\", \"Unnamed\")}: {s.get(\"description\", \"No description\")}') for s in servers]" <<< "$SERVERS_JSON"
-echo ""
-```
-
-**Ask user:**
-
-"Do you want to add **AI workspace content** (skills, commands, agents) to any of your ClaudeWS servers?
-
-You have ${SERVER_COUNT} ClaudeWS server(s) available:
-$(python3 -c "import sys, json; servers = json.load(sys.stdin); [print(f' - {s.get(\"name\", \"Unnamed\")}') for s in servers]" <<< "$SERVERS_JSON")
-
----
-
-### 4. If User Skips (Has Servers but Doesn't Want to Add)
+**If user skips:**
 
 ```bash
 skip_state 7
 ```
 
 **Show skip prompt:**
+Use `templates/common-responses.md` → AI Workspaces
+
+**If SERVER_COUNT > 0:**
 
 ```
-⏭️ AI Workspaces skipped
+🔧 Found ${SERVER_COUNT} ClaudeWS server(s):
 
-📍 What's next: Package & Export (final step)
-   Package everything into a ZIP file ready for import.
+$(list_claudews_servers "$SERVERS_JSON")
 
-👉 Continue to package
+Do you want to add AI workspace content (skills, commands, agents) to any of these servers?
+
+Type 'skip' to continue, or tell me which server(s) you want to configure.
 ```
 
 ---
 
-### 5. For EACH Selected Server, Configure
+### 3. For EACH Selected Server, Gather Requirements
 
-**IMPORTANT:**
+**Ask user:**
 
-- User sees and selects by **server name**
-- Folder name uses **server ID** (e.g., "719d50a4-e22a-4913-83ad-acfdd4597aef")
-- This ID is used internally, not shown to user
+```
+Let's configure server: **{Server Name}**
 
-Ask user for each server by **name**:
+What content do you want to add?
 
-- "Server: **{server-name}** - What content do you want to add?"
-  - Skills? (specific capabilities for the AI)
-  - Commands? (slash commands like /summary, /analyze)
-  - Agents? (specialized assistant prompts)
+1. **Skills?** (optional)
+   Examples: Code review, data analysis, document summarization
+
+2. **Commands?** (optional)
+   Examples: /summary, /analyze, /report
+
+3. **Agents?** (optional)
+   Examples: Code reviewer, data analyst, support assistant
+
+Tell me what you need for this server.
+```
+
+**Gather information FIRST, don't create anything yet.**
 
 ---
 
-### 6. Create Workspace Structure
+### 4. Show Preview (BEFORE Creating)
+
+```
+Perfect! Here's what I'll add to **{Server Name}**:
+
+📚 Skills: {list of skills}
+🔧 Commands: {list of commands}
+🤖 Agents: {list of agents}
+
+Ready to create? (say **"yes"** to proceed)
+```
+
+---
+
+### 5. Create Workspace Content
 
 ```bash
-# Get server ID from name (user selected by name, we need ID for folder)
+# Get server ID from name using helper function
 SERVER_NAME="{server-name-selected-by-user}"
-SERVER_ID=$(python3 -c "import sys, json; servers = json.load(sys.stdin); server = next((s for s in servers if s.get('name') == '${SERVER_NAME}'), None); print(server['id'] if server else '')" <<< "$SERVERS_JSON")
+SERVER_ID=$(get_claudews_server_id "$SERVERS_JSON" "$SERVER_NAME")
 
-if [[ -z "${SERVER_ID}" ]]; then
-  echo "❌ Error: Could not find server ID for '${SERVER_NAME}'"
-  exit 1
-fi
-
-# Create directory structure for this server
+# Create directory structure
 ensure_dir "template-${SLUG}/claude-ws/data/${SERVER_ID}/agents"
 ensure_dir "template-${SLUG}/claude-ws/data/${SERVER_ID}/skills"
 ensure_dir "template-${SLUG}/claude-ws/data/${SERVER_ID}/commands"
 ```
 
----
-
-### 7. Create Skills (if user wants)
-
-Skills require a **subfolder** with `SKILL.md` file:
+**5a. Add Skills** (if user wants)
 
 ```bash
-# For each skill
 SKILL_NAME="{skill-name}"
 SKILL_SLUG=$(echo "${SKILL_NAME}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
 
-# Create skill subfolder
 ensure_dir "template-${SLUG}/claude-ws/data/${SERVER_ID}/skills/${SKILL_SLUG}"
 
-# Create main SKILL.md
 cat > template-${SLUG}/claude-ws/data/${SERVER_ID}/skills/${SKILL_SLUG}/SKILL.md << EOF
 # ${SKILL_NAME}
 
@@ -171,32 +136,17 @@ cat > template-${SLUG}/claude-ws/data/${SERVER_ID}/skills/${SKILL_SLUG}/SKILL.md
 ## When to use
 
 {Describe when this skill should be used}
-
-## How it works
-
-{Explain how this skill works}
 EOF
-
-# Optional: Add references/ and scripts/ subfolders
-ensure_dir "template-${SLUG}/claude-ws/data/${SERVER_ID}/skills/${SKILL_SLUG}/references"
-ensure_dir "template-${SLUG}/claude-ws/data/${SERVER_ID}/skills/${SKILL_SLUG}/scripts"
 ```
 
----
-
-### 8. Create Commands (if user wants)
-
-Commands require a **subfolder** with `COMMAND.md` file:
+**5b. Add Commands** (if user wants)
 
 ```bash
-# For each command
-COMMAND_NAME="{command-name}"  # e.g., "summary", "analyze"
+COMMAND_NAME="{command-name}"
 COMMAND_SLUG=$(echo "${COMMAND_NAME}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
 
-# Create command subfolder
 ensure_dir "template-${SLUG}/claude-ws/data/${SERVER_ID}/commands/${COMMAND_SLUG}"
 
-# Create COMMAND.md
 cat > template-${SLUG}/claude-ws/data/${SERVER_ID}/commands/${COMMAND_SLUG}/COMMAND.md << EOF
 # /${COMMAND_NAME}
 
@@ -205,30 +155,17 @@ cat > template-${SLUG}/claude-ws/data/${SERVER_ID}/commands/${COMMAND_SLUG}/COMM
 ## Usage
 
 ${COMMAND_NAME} {parameters}
-
-## Examples
-
-\`\`\`
-/${COMMAND_NAME} example
-\`\`\`
 EOF
 ```
 
----
-
-### 9. Create Agents (if user wants)
-
-Agents require a **subfolder** with `PROMPT.md` file:
+**5c. Add Agents** (if user wants)
 
 ```bash
-# For each agent
 AGENT_NAME="{agent-name}"
 AGENT_SLUG=$(echo "${AGENT_NAME}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
 
-# Create agent subfolder
 ensure_dir "template-${SLUG}/claude-ws/data/${SERVER_ID}/agents/${AGENT_SLUG}"
 
-# Create PROMPT.md
 cat > template-${SLUG}/claude-ws/data/${SERVER_ID}/agents/${AGENT_SLUG}/PROMPT.md << EOF
 # ${AGENT_NAME}
 
@@ -242,52 +179,31 @@ cat > template-${SLUG}/claude-ws/data/${SERVER_ID}/agents/${AGENT_SLUG}/PROMPT.m
 
 - {Capability 1}
 - {Capability 2}
-- {Capability 3}
-
-## Guidelines
-
-{Additional guidelines for the agent}
 EOF
 ```
 
 ---
 
-### 10. Update \_workspaces.json
+### 6. Update \_workspaces.json
 
 ```bash
-# Get server description
-SERVER_DESC=$(python3 -c "import sys, json; servers = json.load(sys.stdin); server = next((s for s in servers if s['id'] == '${SERVER_ID}'), {}); print(server.get('description', ''))" <<< "$SERVERS_JSON")
+# Get server description using helper function
+SERVER_DESC=$(get_claudews_server_desc "$SERVERS_JSON" "$SERVER_ID")
 
-# Add to workspaces index
+# Add to index
 add_to_index "${SLUG}" "claude-ws/_workspaces.json" "${SERVER_ID}" "${SERVER_NAME}" "${SERVER_DESC}" "data/${SERVER_ID}"
 ```
 
 ---
 
-### 11. After Completion
+### 7. Update State & Show Completion
 
 ```bash
-WS_COUNT=$(get_count "${SLUG}" "claude-ws/_workspaces.json" "workspaces")
-update_state 7 "claudeWorkspaces" ${WS_COUNT}
+update_step_state 7 "claudeWorkspaces" "claude-ws/_workspaces.json"
 ```
 
 **Show completion prompt:**
-
-```
-✅ AI Workspaces are ready!
-
-📊 We've added:
-
-   • {count} AI workspaces
-   • {list of workspace names}
-
-📍 What's next: Package & Export (final step)
-   Package everything into a ZIP file ready for import.
-
-• Continue to package
-```
-
-**Note: This is the LAST optional step. After this, only Step 8 (Package) remains.**
+Use `templates/common-responses.md` → AI Workspaces
 
 ---
 

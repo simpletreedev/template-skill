@@ -8,17 +8,31 @@ Finalize template, create ZIP package, and show success message.
 
 ## What To Do
 
-### 0. Initialize Step Variables
+### 1. Show Preview (BEFORE Packaging)
 
-```bash
-# Load common variables (helpers already loaded by SKILL.md)
-init_step
-# Now: SLUG, NAME, DESCRIPTION, TIMESTAMP are available
-```
+"Great! We've completed all the steps. Let me package everything up for you.
+
+Here's what we've built:
+
+📋 **Lists:** {count} - {list names}
+📄 **Documents:** {count} (if any)
+📁 **Files:** {count} (if any)
+⚙️ **Automations:** {count} (if any)
+🤖 **Chat Agents:** {count} (if any)
+🧠 **AI Workspaces:** {count} (if any)
+
+I'll now:
+
+1. Update the template metadata
+2. Create import instructions
+3. Package everything into a ZIP file
+4. Upload it to the cloud for easy download
+
+Ready to package?"
 
 ---
 
-### 1. Update metadata.json with Final Counts
+### 2. Update metadata.json with Final Counts
 
 ```bash
 # Get counts from state
@@ -43,7 +57,7 @@ jq --argjson lists ${LISTS} \
 
 ---
 
-### 2. Create IMPORT.md
+### 3. Create IMPORT.md
 
 ```bash
 eval $(jq -r '@sh "NAME=\(.name) DESC=\(.description)"' template-${SLUG}/metadata.json)
@@ -86,7 +100,7 @@ EOF
 
 ---
 
-### 3. Create ZIP Package
+### 4. Create ZIP Package
 
 ```bash
 cd template-${SLUG}/
@@ -96,7 +110,7 @@ cd ..
 
 ---
 
-### 4. Upload to Cloud Server
+### 5. Upload to Cloud Server
 
 ```bash
 ZIP_FILE="${SLUG}-template.zip"
@@ -105,19 +119,20 @@ ZIP_FILE="${SLUG}-template.zip"
 DOWNLOAD_URL=$(upload_to_cloud "${ZIP_FILE}")
 
 if [[ -n "${DOWNLOAD_URL}" && "${DOWNLOAD_URL}" != "null" ]]; then
-  echo "✅ Upload successful! Cloud URL: ${DOWNLOAD_URL}"
+  # Success - continue to cleanup
+  true
 else
-  echo "❌ Error: Failed to upload template to server"
-  echo "Would you like me to try again? (say 'retry' to attempt upload again)"
+  # Upload failed - ask user
+  echo "❌ Upload failed. Would you like me to try again? (say 'retry')"
   exit 1
 fi
 ```
 
-**NOTE:** If user says "retry", go back to step 4 and attempt the upload again without recreating the ZIP file.
+**NOTE:** If user says "retry", go back to step 5 and attempt the upload again without recreating the ZIP file.
 
 ---
 
-### 5. Clean Up Temporary Files
+### 6. Clean Up Temporary Files
 
 ```bash
 rm -rf template-${SLUG}/
@@ -129,39 +144,40 @@ rm .py* 2>/dev/null || true
 
 ---
 
-### 6. Show Final Success Message
+### 7. Show Final Success Message
 
-**IMPORTANT: Follow the below example exactly**
+**IMPORTANT: Make it celebratory and clear!**
 
 ```
-✅ Done! Your ${Template Name} template is ready!
+✅ Done! Your ${NAME} template is ready!
 
-📋 Template: ${Template Name}
-📝 Description: ${description}
+📋 Template: ${NAME}
+📝 Description: ${DESC}
 
 📦 Package contents:
    ✓ metadata.json
    ✓ entities/
-     • lists: ${lists_count}
-     • documents: ${documents_count}
-     • files: ${files_count}
+     • lists: ${LISTS}
+     • documents: ${DOCS}
+     • files: ${FILES}
    ✓ flows/
-     • automations: ${automations_count}
-     • chat-agents: ${agents_count}
+     • automations: ${AUTOS}
+     • chat-agents: ${AGENTS}
    ✓ claude-ws/
-     • workspaces: ${workspaces_count}
+     • workspaces: ${WS}
    ✓ IMPORT.md
 
 📊 Summary:
-   📋 Lists: ${lists_count}
-   📄 Documents: ${documents_count}
-   📁 Files: ${files_count}
-   ⚙️ Automations: ${automations_count}
-   🤖 Chat Agents: ${agents_count}
-   🧠 AI Workspaces: ${workspaces_count}
+   📋 Lists: ${LISTS}
+   📄 Documents: ${DOCS}
+   📁 Files: ${FILES}
+   ⚙️ Automations: ${AUTOS}
+   🤖 Chat Agents: ${AGENTS}
+   🧠 AI Workspaces: ${WS}
 
 📥 Download your template:
-🔗 ${SLUG}-template.zip ${DOWNLOAD_URL}
+🔗 ${SLUG}-template.zip
+🔗 ${DOWNLOAD_URL}
 
 🎯 What's next?
    1. Click the link above to download your template
@@ -170,11 +186,13 @@ rm .py* 2>/dev/null || true
    4. Start using your template!
 
 🚀 Ready to use!
+
+🎉 Congratulations! You've built an amazing template!
 ```
 
 ---
 
-### 7. Update State File (Final)
+### 8. Update State File (Final)
 
 ```bash
 update_state 8 "dummy" 0

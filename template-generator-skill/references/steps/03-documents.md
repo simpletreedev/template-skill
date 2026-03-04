@@ -8,22 +8,9 @@ Add document templates (wiki pages, guides, meeting notes).
 
 ## What To Do
 
-### 0. Initialize Step Variables
-
-```bash
-# Load common variables (helpers already loaded by SKILL.md)
-init_step
-# Now: SLUG, NAME, DESCRIPTION, TIMESTAMP are available
-```
-
----
-
 ### 1. Ask User
 
-"Do you need any **documents** in this template?
-Documents are markdown/text files for documentation, guides, or notes.
-
-Type 'skip' to continue, or tell me how many documents you need."
+Use `templates/common-user-prompts.md` → Documents
 
 ---
 
@@ -33,19 +20,48 @@ Type 'skip' to continue, or tell me how many documents you need."
 skip_state 3
 ```
 
-Show skip prompt and return control.
+**Show skip prompt:**
+Use `templates/common-responses.md` → Documents
 
 ---
 
-### 3. For EACH Document, Ask:
+### 3. For EACH Document, Gather Requirements
 
-- "Document title?"
-- "What's this document for? (brief description)"
-- "What content should be included? (I'll help structure it)"
+**Ask user:**
+
+```
+Let's create your document: **{Document Title}**
+
+**1. What's this document for?** (brief description)
+
+**2. What content should be included?** (I'll help structure it nicely)
+
+📝 What would you like to start with? (or say **"you decide"** to let me design the best setup)
+```
+
+**Gather information FIRST, don't create anything yet.**
 
 ---
 
-### 4. Create Document Data File
+### 4. Show Preview (BEFORE Creating)
+
+```
+Perfect! Here's what I'll create:
+
+📄 **{Document Title}**
+   {Description}
+
+   Content preview:
+   {First few lines or summary of content}
+
+This document will {purpose/benefit}.
+
+Ready to create this document? (say **"yes"** to proceed)
+```
+
+---
+
+### 5. Create Document Data File
 
 ```bash
 DOC_KEY="{doc-key}"
@@ -64,7 +80,7 @@ EOF
 
 ---
 
-### 5. Update _documents.json
+### 6. Update \_documents.json
 
 ```bash
 add_to_index "${SLUG}" "entities/documents/_documents.json" "doc-${DOC_KEY}" "{Doc Title}" "{Description}" "data/doc-${DOC_KEY}/data.json"
@@ -72,36 +88,14 @@ add_to_index "${SLUG}" "entities/documents/_documents.json" "doc-${DOC_KEY}" "{D
 
 ---
 
-### 6. Update State File
+### 7. After Completion
 
 ```bash
-DOC_COUNT=$(get_count "${SLUG}" "entities/documents/_documents.json" "documents")
-update_state 3 "documents" ${DOC_COUNT}
+update_step_state 3 "documents" "entities/documents/_documents.json"
 ```
 
----
-
-### 7. Show PAUSE Prompt
-
-```
-✅ Documents are ready!
-
-📊 We've added:
-   • {count} document templates
-
-📍 What's next: Files & Attachments (optional)
-   This is for organizing files in folders - like reports, templates, images.
-   Also optional - only if you need file management.
-
-What's next?
-• Add files to your template? (say "continue" or describe what files)
-• Skip files for now? (say "skip")
-• Want to adjust the documents? (say "go back")
-
-What works for you? 📁
-```
-
-**⚠️ PAUSE HERE - WAIT FOR USER RESPONSE**
+**Show completion prompt:**
+Use `templates/common-responses.md` → Documents
 
 ---
 
