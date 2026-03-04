@@ -19,7 +19,6 @@ SERVERS_JSON=$(check_claudews_servers)
 
 # Validate that we got valid JSON
 if [[ -z "${SERVERS_JSON}" ]] || [[ "${SERVERS_JSON}" == "Error:"* ]]; then
-  # Error case - but DON'T exit, just inform and offer skip
   HAS_ERROR=1
 else
   HAS_ERROR=0
@@ -29,51 +28,51 @@ fi
 
 # Check if we have any servers
 if [[ ${HAS_ERROR} -eq 1 ]] || [[ ${SERVER_COUNT} -eq 0 ]]; then
-  # No servers available - inform user and offer to skip
-  echo "⚠️ No ClaudeWS servers found"
-  echo ""
-  echo "AI Workspaces require ClaudeWS servers to be configured first."
-  echo ""
-  echo "To set up ClaudeWS servers:"
-  echo "  1. Go to PrivOs settings"
-  echo "  2. Configure at least one ClaudeWS server"
-  echo "  3. Add PRIVOS_API_URL to .env file in this skill directory"
-  echo ""
-  echo "For now, we'll skip this step. You can add AI Workspaces later after configuring servers."
-  echo ""
-
-  # Set flag to skip this step
-  SHOULD_SKIP=1
+  HAS_SERVERS=0
 else
-  SHOULD_SKIP=0
+  HAS_SERVERS=1
 fi
 ```
 
 ---
 
-### 2. If No Servers - Skip Gracefully
+### 2. If No Servers - Inform User
 
-```bash
-if [[ ${SHOULD_SKIP} -eq 1 ]]; then
-  # Skip this step - but don't exit with error
-  # Just show skip prompt and move to next step
-  echo "⏭️ Skipping AI Workspaces (no servers configured)"
-  echo ""
-  echo "📍 What's next: Package & Export (final step)"
-  echo "   Package everything into a ZIP file ready for import."
-  echo ""
-  echo "👉 Continue to package"
-  echo ""
+**⚠️ IMPORTANT: If HAS_SERVERS=0, show this message to user and ASK what they want to do:**
 
-  # Update state to mark this step as skipped
-  skip_state 7
+```
+⚠️ No ClaudeWS servers found
 
-  # Exit gracefully (not an error)
-  exit 0
-fi
+AI Workspaces require ClaudeWS servers to be configured first.
+
+To set up servers:
+  1. Go to PrivOs settings
+  2. Configure at least one ClaudeWS server
+  3. Add PRIVOS_API_URL to .env file in this skill directory
+
+What would you like to do?
+👉 Configure servers now and continue
+⏭️ Skip this step for now
 ```
 
-**⚠️ CRITICAL: After this point, we know servers exist. The code below only runs if SHOULD_SKIP=0**
+**If user wants to skip:**
+
+```bash
+skip_state 7
+```
+
+**Then show skip prompt:**
+
+```
+⏭️ AI Workspaces skipped
+
+📍 What's next: Package & Export (final step)
+   Package everything into a ZIP file ready for import.
+
+👉 Continue to package
+```
+
+**⚠️ CRITICAL: The code below (steps 3+) only runs if HAS_SERVERS=1**
 
 ---
 
