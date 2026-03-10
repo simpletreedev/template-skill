@@ -258,9 +258,9 @@ create_automation() {
   local AUTOMATION_ID="$2"
   local SLUG=$(get_slug)
 
-  mkdir -p "template-${SLUG}/entities/lists/data/${LIST_KEY}"
+  mkdir -p "${TEMPLATE_DIR}/entities/lists/data/${LIST_KEY}"
 
-  cat > "template-${SLUG}/entities/lists/data/${LIST_KEY}/automation.json" << EOF
+  cat > "${TEMPLATE_DIR}/entities/lists/data/${LIST_KEY}/automation.json" << EOF
 {
   "automations": [
     {
@@ -298,7 +298,7 @@ EOF
 
 ## Examples
 
-### Example 1: Notify on High Priority Items
+### Example 1: Notify on High Priority Items (Simple)
 
 ```json
 {
@@ -371,75 +371,7 @@ EOF
 }
 ```
 
-### Example 3: Daily Digest Email
-
-```json
-{
-  "automations": [
-    {
-      "id": "automation_daily_summary",
-      "isActive": true,
-      "name": "Daily Task Summary",
-      "description": "Send daily email summary at 9 AM",
-      "triggers": [
-        {
-          "type": "schedule_daily",
-          "config": {
-            "time": "09:00"
-          }
-        }
-      ],
-      "actions": [
-        {
-          "type": "send_email",
-          "config": {
-            "to": "{{team.email}}",
-            "subject": "Daily Task Summary - {{date}}",
-            "body": "Tasks completed yesterday: {{stats.completed}}"
-          }
-        }
-      ],
-      "order": 0
-    }
-  ]
-}
-```
-
-### Example 4: Stage Overdue Alert
-
-```json
-{
-  "automations": [
-    {
-      "id": "automation_review_overdue",
-      "isActive": true,
-      "name": "Review Overdue Alert",
-      "description": "Alert if item in Review stage for more than 2 days",
-      "triggers": [
-        {
-          "type": "stage_overdue",
-          "config": {
-            "listKey": "list-tasks",
-            "stageKey": "stage_review",
-            "duration": "2d"
-          }
-        }
-      ],
-      "actions": [
-        {
-          "type": "send_notification",
-          "config": {
-            "message": "⚠️ Item {{item.name}} has been in Review for 2+ days"
-          }
-        }
-      ],
-      "order": 0
-    }
-  ]
-}
-```
-
----
+**💡 See `../template-structure.md` for complete automation data format reference.**
 
 ---
 
@@ -570,7 +502,7 @@ create_automation_file() {
   local SLUG=$(get_slug)
 
   # Read all automations from user input and build JSON array
-  cat > "template-${SLUG}/entities/lists/data/${LIST_KEY}/automation.json" << EOF
+  cat > "${TEMPLATE_DIR}/entities/lists/data/${LIST_KEY}/automation.json" << EOF
 {
   "automations": [
     // Each automation from user input

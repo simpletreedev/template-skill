@@ -1,43 +1,82 @@
-# Step: STEP 4 - FILES (OPTIONAL)
+# Step 4: Files (Optional)
 
-## Purpose
+## What We're Creating
 
-Add document files to template using Claude's built-in skills (xlsx, docx, pdf).
+Add document files (Excel, Word, PDF) to provide templates and resources for users.
 
----
+## Preview
 
-## What To Do
-
-### 1. Ask User
-
-Use `templates/common-user-prompts.md` → Files
-
----
-
-### 2. If User Skips
-
-```bash
-skip_state 4
+```
+📁 Files
+├── 📊 reports/
+│   └── {filename}.xlsx
+└── 📝 documents/
+    └── {filename}.docx
 ```
 
-**Show skip prompt:**
-Use `templates/common-responses.md` → Files
+Each file provides ready-to-use templates or reference materials.
 
----
+## Let's Create This
 
-### 3. Setup Directory
+### Step 0: Set up context
 
 ```bash
-BASE_DIR="template-${SLUG}/entities/files/storage"
-ensure_dir "${BASE_DIR}/reports"
-ensure_dir "${BASE_DIR}/documents"
+# Validate session file and get template path
+SESSION_ID="${CLAUDE_SESSION_ID:-${SESSION_ID:-123}}"
+SESSION_FILE="$(dirname "$(pwd)")/sid-${SESSION_ID}"
+
+if [[ ! -f "$SESSION_FILE" ]]; then
+    echo "❌ Error: Session file not found: sid-${SESSION_ID}"
+    echo "   Please run: bash scripts/quick-init.sh <slug> <name> <description>"
+    exit 1
+fi
+
+# Read and verify template path
+export TEMPLATE_DIR=$(cat "$SESSION_FILE")
+echo "📍 Template: $TEMPLATE_DIR"
 ```
 
----
+### Step 1: Ask User
 
-### 4. For EACH File, Gather Requirements
+```
+Files are great for Excel templates, Word docs, PDF reports, and other resources. 📁
 
-**Ask user:**
+Would you like to add any files to your template?
+
+👉 Continue to add files
+
+⏭️ Skip files
+```
+
+### Step 2: If User Skips
+
+```bash
+python3 scripts/core.py skip 4
+```
+
+**Show skip response:**
+
+```
+⏭️ Files skipped
+
+📍 What's next: Automations (optional)
+
+Smart rules that trigger actions automatically.
+
+👉 Continue to add automations
+
+⏭️ Skip automations
+```
+
+### Step 3: Setup Directory
+
+```bash
+BASE_DIR="${TEMPLATE_DIR}/entities/files/storage"
+mkdir -p "${BASE_DIR}/reports"
+mkdir -p "${BASE_DIR}/documents"
+```
+
+### Step 4: For EACH File, Gather Requirements
 
 ```
 What file do you need?
@@ -45,8 +84,11 @@ What file do you need?
 Tell me:
 
 **1. File type** - Excel, Word, or PDF?
+
 **2. File name** - What should it be called?
+
 **3. Purpose** - What will this file be used for?
+
 **4. Content** - What data/information should be included?
 
 Or say 'samples' if you want me to create some example files to get you started.
@@ -54,9 +96,7 @@ Or say 'samples' if you want me to create some example files to get you started.
 
 **Gather information FIRST, don't create anything yet.**
 
----
-
-### 5. Show Preview (BEFORE Creating)
+### Step 5: Show Preview (BEFORE Creating)
 
 ```
 Perfect! Here's what I'll create:
@@ -73,12 +113,11 @@ This file will {benefit/use case}.
 Ready to create this file? (say **"yes"** to proceed)
 ```
 
----
+### Step 6: Generate Files Using Skills
 
-### 6. Generate Files Using Skills
+**Use Claude's built-in skills:**
 
 #### Excel (.xlsx) - Use xlsx skill
-
 ```
 Create ${BASE_DIR}/reports/{filename}.xlsx:
 Title: {Sheet Title}
@@ -89,7 +128,6 @@ Rows:
 ```
 
 #### Word (.docx) - Use docx skill
-
 ```
 Create ${BASE_DIR}/documents/{filename}.docx:
 Title: {Document Title}
@@ -98,7 +136,6 @@ Section: {Section Name} - {Content}
 ```
 
 #### PDF (.pdf) - Use pdf skill
-
 ```
 Create ${BASE_DIR}/reports/{filename}.pdf:
 Title: {Document Title}
@@ -106,89 +143,46 @@ Section: {Section Name} - {Content}
 Section: {Section Name} - {Content}
 ```
 
-#### Optional: CSV/MD/TXT (only if user requests)
+### Step 7: Update _manifest.json
 
 ```bash
-# CSV (if requested)
-cat > "${BASE_DIR}/exports/data.csv" << 'EOF'
-Column1,Column2,Column3
-value1,value2,value3
-EOF
+# Create manifest with all files
+python3 << PYTHON
+import json
+from pathlib import Path
 
-# Markdown (if requested)
-cat > "${BASE_DIR}/documents/README.md" << 'EOF'
-# {Title}
+base_dir = Path("${BASE_DIR}")
+files = {}
 
-## Overview
-{Content}
+for file_path in base_dir.rglob("*"):
+    if file_path.is_file():
+        rel_path = str(file_path.relative_to(base_dir))
+        files[rel_path] = {
+            "display_name": file_path.name,
+            "description": "Generated file",
+            "is_embedded": False
+        }
 
-## Details
-{More content}
-EOF
-```
-
----
-
-### 7. Update \_manifest.json
-
-```bash
-FILE_COUNT=$(find "${BASE_DIR}" -type f | wc -l)
-
-cat > "template-${SLUG}/entities/files/_manifest.json" << EOF
-{
-  "version": "1.0",
-  "files": {
-$(find "${BASE_DIR}" -type f | sed "s|${BASE_DIR}/||" | while read file; do
-  echo "    \"${file}\": {"
-  echo "      \"display_name\": \"$(basename ${file})\","
-  echo "      \"description\": \"Generated file\","
-  echo "      \"is_embedded\": false"
-  echo "    },"
-done | sed '$ s/,$//')
-  }
+manifest = {
+    "version": "1.0",
+    "files": files
 }
-EOF
+
+with open('${TEMPLATE_DIR}/entities/files/_manifest.json', 'w') as f:
+    json.dump(manifest, f, indent=2)
+PYTHON
 ```
 
----
-
-### 8. Update State & Show Completion
+### Step 8: After Completion
 
 ```bash
-update_step_state 4 "files" "entities/files/_manifest.json"
+# Count files
+FILE_COUNT=$(python3 -c "import json; print(len(json.load(open('${TEMPLATE_DIR}/entities/files/_manifest.json'))['files']))")
+
+# Update state
+python3 scripts/core.py update 4 "files" ${FILE_COUNT}
 ```
 
-**Show completion prompt:**
-Use `templates/common-responses.md` → Files
+## ✅ Files Ready!
 
----
-
-## Notes
-
-**Priority Files (always offer first):**
-
-- ✅ Excel (.xlsx) - For data tables, budgets, trackers
-- ✅ Word (.docx) - For documents, guides, reports
-- ✅ PDF (.pdf) - For finalized reports, summaries
-
-**Optional Files (only if requested):**
-
-- CSV - Simple data export
-- Markdown - Documentation
-- Text - Plain notes
-
-**Best Practices:**
-
-- Use Claude skills (xlsx, docx, pdf) for best results
-- Only create CSV/MD/TXT if user explicitly requests
-- Always update \_manifest.json with created files
-- Keep file sizes reasonable (< 10MB each)
-
----
-
-## Return Control
-
-After user says "continue", return to main orchestrator.
-Main orchestrator will load next step: `05-automations.md`
-
-If user says "skip", this is already handled above.
+**See `INDEX.md` for response template.**

@@ -1,196 +1,171 @@
-# Step: STEP 6 - CHAT AGENTS (OPTIONAL)
+# Step 6: Agent Workflows (Optional)
 
-## Purpose
+## What We're Creating
 
-Configure AI chat agents (AI assistants for specific tasks).
+Help users create agent workflows - multi-step AI agent flows that automate complex tasks using specialized agents working together.
 
----
+## Let's Guide Users
 
-## What To Do
-
-### 1. Ask User
-
-Use `templates/common-user-prompts.md` → Chat Agents
-
----
-
-### 2. If User Skips
+### Step 0: Set up context
 
 ```bash
-skip_state 6
+# Validate session file and get template path
+SESSION_ID="${CLAUDE_SESSION_ID:-${SESSION_ID:-123}}"
+SESSION_FILE="$(dirname "$(pwd)")/sid-${SESSION_ID}"
+
+if [[ ! -f "$SESSION_FILE" ]]; then
+    echo "❌ Error: Session file not found: sid-${SESSION_ID}"
+    echo "   Please run: bash scripts/quick-init.sh <slug> <name> <description>"
+    exit 1
+fi
+
+# Read and verify template path
+export TEMPLATE_DIR=$(cat "$SESSION_FILE")
+echo "📍 Template: $TEMPLATE_DIR"
 ```
 
-**Show skip prompt:**
-Use `templates/common-responses.md` → Chat Agents
+### Step 1: Suggest Workflows Based on User Requirements
 
----
-
-### 3. For EACH Agent, Gather Requirements
-
-**Ask user:**
+**Based on the user's initial requirements, suggest relevant agent workflows:**
 
 ```
-Let's create your AI agent: **{Agent Name}**
+Based on your template for **{Template Name}**, here are some agent workflows that would be useful:
 
-I need to know:
+1. **{Workflow Name 1}**
+   {Brief description of what it does}
 
-1. **What's the agent's role?**
-   Examples: Project Assistant, Code Reviewer, Customer Support, Data Analyst
+   Why it helps: {Benefit for this specific template}
 
-2. **What should it help with?** (description)
-   Examples: Help manage tasks, review code quality, answer customer questions, analyze data
+2. **{Workflow Name 2}**
+   {Brief description of what it does}
 
-3. **Which AI workspace should it use?** (optional)
-   If you created AI workspaces in step 7, this agent can use them.
-   If not, I can skip this or we can create a workspace first.
+   Why it helps: {Benefit for this specific template}
 
-4. **Any slash commands?** (optional)
-   Examples: /summary, /tasks, /analyze - These are quick actions users can trigger
+3. **{Workflow Name 3}**
+   {Brief description of what it does}
 
-Tell me about this agent and I'll put it together for you.
+   Why it helps: {Benefit for this specific template}
+
+Would you like to add any of these workflows?
+
+👉 Add workflow(s) - tell me which one(s)
+
+🔗 Describe custom workflow - tell me what you need
+
+⏭️ Skip workflows
 ```
 
-**Gather information FIRST, don't create anything yet.**
+### Step 2: Handle User Response
 
----
+**If user skips:**
 
-### 4. Show Preview (BEFORE Creating)
-
-```
-Perfect! Here's what I'll create:
-
-🤖 **{Agent Name}**
-   Role: {Role description}
-   Purpose: {What it helps with}
-   AI Workspace: {workspace key (if applicable)}
-   Commands: {list of commands (if any)}
-
-This agent will {benefit/use case}.
-
-Ready to create this agent? (say **"yes"** to proceed)
+```bash
+python3 scripts/core.py skip 6
 ```
 
----
-
-### 5. Create Agent Flow Using flow skill
-
-**IMPORTANT: Always use the `flow` skill to generate agent flow JSON.**
-
-**Step 5a: Invoke flow skill**
-
-Use the Skill tool to call the flow skill:
+**Show skip response:**
 
 ```
-flow skill: create agent flow for {Agent Name}
+⏭️ Agent workflows skipped
+
+📍 What's next: AI Workspaces (optional)
+Add skills, commands, and agents to existing ClaudeWS servers.
+
+👉 Continue to add AI workspaces
+
+⏭️ Skip AI workspaces
+```
+
+**If user selects workflow(s) from suggestions:**
+
+```
+Great choices! The flow generator will ask you a few questions to customize these workflows for your needs.
+
+👉 Ready to continue? (say **"yes"** to launch the flow generator)
+```
+
+**If user describes custom workflow:**
+
+```
+Perfect! The flow generator will ask you some questions to understand your exact requirements and create the perfect workflow.
+
+👉 Ready to continue? (say **"yes"** to launch the flow generator)
+```
+
+### Step 3: Delegate to flow Skill
+
+**⚠️ IMPORTANT: Once user confirms, call the `flow` skill. The flow skill will handle all requirement gathering.**
+
+**Use the Skill tool to call flow skill:**
+
+```
+flow skill: create agent workflow for {Workflow Name}
 
 Context:
-- Agent role: {role from step 3}
-- Description: {what it helps with from step 3}
-- AI workspace: {workspace key from step 3}
-- Commands: {list of commands from step 3}
+- Template: {Template Name}
+- User's initial request: {what user described or selected}
+- Template context: {relevant lists/structures created in previous steps}
 
-The flow should handle user messages and provide appropriate responses based on the agent's role.
+The flow skill should:
+1. Ask clarifying questions about data sources, inputs, outputs
+2. Understand the user's specific requirements
+3. Generate the complete flow JSON structure
 ```
 
-**Step 5b: Receive flow JSON**
+**⚠️ IMPORTANT: Let the flow skill complete its entire interaction loop. DO NOT interrupt or ask additional questions here.**
 
-The flow skill will return a complete flow JSON. Save this as `FLOW_JSON`.
-
-**Step 5c: Create agent data file**
+### Step 4: Save Workflow (if flow skill returns valid JSON)
 
 ```bash
-AGENT_KEY="{agent-key}"
+# Only proceed if flow skill returned valid flow JSON
+WORKFLOW_KEY="{workflow-key}"
 
-ensure_dir "template-${SLUG}/flows/chat-agents/data/${AGENT_KEY}"
+# Create directory
+mkdir -p "${TEMPLATE_DIR}/flows/chat-agents/data/${WORKFLOW_KEY}"
 
-cat > template-${SLUG}/flows/chat-agents/data/${AGENT_KEY}/data.json << 'EOF'
+# Save the flow from flow skill
+cat > "${TEMPLATE_DIR}/flows/chat-agents/data/${WORKFLOW_KEY}/data.json" << 'EOF'
 {
-  "flowId": "flow-${AGENT_KEY}",
-  "name": "{Agent Name}",
-  "flow": ${FLOW_JSON},
-  "claudeWs": "claude-ws-{key}",
-  "agentPrompt": "{System prompt for the agent}",
-  "commands": [
-    {
-      "name": "/{command}",
-      "description": "{What this command does}",
-      "skill": "skill-file.md"
-    }
-  ],
+  "flowId": "flow-${WORKFLOW_KEY}",
+  "name": "{Workflow Name}",
+  "flow": {FLOW_JSON_FROM_FLOW_SKILL},
   "description": "{Description}"
 }
 EOF
 ```
 
-**Best Practices:**
-
-✅ **CORRECT:**
-
-```
-flow skill: create agent flow for Code Reviewer
-Context:
-- Role: Review code for quality, bugs, and best practices
-- Description: Helps developers review code before merging
-- Workspace: claude-ws-dev
-- Commands: /review, /suggest
-
-[Save flow skill output → use in data.json]
-```
-
-❌ **WRONG:**
-
-```json
-{
-  "flow": {
-    "nodes": [
-      { "typeId": 1, "inputs": { ... } }  // Don't manually create this!
-    ]
-  }
-}
-```
-
----
-
-### 6. Update \_agents.json
+### Step 5: Update Workflows Index
 
 ```bash
-AGENT_KEY="{agent-key}"
-NAME="{Agent Name}"
-DESC="{Description}"
+# Read existing index
+INDEX_FILE="${TEMPLATE_DIR}/flows/workflows/_workflows.json"
+INDEX=$(cat "$INDEX_FILE" 2>/dev/null || echo '{"workflows":[]}')
 
-add_to_index "${SLUG}" "flows/chat-agents/_agents.json" "agent-${AGENT_KEY}" "${NAME}" "${DESC}" "data/agent-${AGENT_KEY}/data.json"
+# Add new workflow entry
+python3 << PYTHON
+import json
+index = $INDEX
+index['workflows'].append({
+    "key": "workflow-${WORKFLOW_KEY}",
+    "name": "{Workflow Name}",
+    "description": "{Description}",
+    "dataPath": "data/workflow-${WORKFLOW_KEY}/data.json"
+})
+with open('$INDEX_FILE', 'w') as f:
+    json.dump(index, f, indent=2)
+PYTHON
 ```
 
----
-
-### 7. Update State & Show Completion
+### Step 6: After Completion
 
 ```bash
-update_step_state 6 "chatAgents" "flows/chat-agents/_agents.json"
+# Count workflows
+WORKFLOW_COUNT=$(python3 -c "import json; print(len(json.load(open('${TEMPLATE_DIR}/flows/workflows/_workflows.json'))['workflows']))")
+
+# Update state
+python3 scripts/core.py update 6 "agentWorkflows" ${WORKFLOW_COUNT}
 ```
 
-**Show completion prompt:**
-Use `templates/common-responses.md` → Chat Agents
+## ✅ Agent Workflows Ready!
 
----
-
-## Data Format References
-
-See `../references/template-structure.md` for complete chat agent data structure.
-
-**Key points:**
-
-- Always use `flow` skill to generate flow JSON
-- Never manually create flow nodes
-- `flow` field contains the complete flow from flow skill
-- `commands` array defines slash commands for quick actions
-- `claudeWs` references AI workspace from step 7 (if created)
-
----
-
-## Return Control
-
-After user says "continue", return to main orchestrator.
-Main orchestrator will load next step: `steps/07-ai-workspaces.md`
-
-If user says "skip", this is already handled above.
+**See `INDEX.md` for response template.**

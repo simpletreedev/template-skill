@@ -1,108 +1,66 @@
-# Step: STEP 1 - INITIALIZE & CREATE FOUNDATION
+# Step 1: Foundation Ready
 
-## Purpose
+## What We're Creating
 
-Create the foundation (state file + folder structure + metadata) for the template.
+Confirm foundation is ready and set up initial state.
 
-**Note:** User already confirmed "ready" in SKILL.md Phase 1. Questions were asked, structure was explained, and user agreed to proceed. This step only executes the foundation creation.
+## Preview
 
-**Immediately execute (no preview, no stopping, no confirmation):**
-
----
-
-## What To Do
-
-### 1. Load Helper Scripts & Create State File
-
-```bash
-source scripts/template-helpers.sh
-python3 scripts/template-manager.py init "{slug}" "{Template Name}" "{Description}"
+```
+✅ Foundation is ready!
+📊 Template structure created
+📍 Next: Lists & Boards
 ```
 
----
+## Let's Complete This
 
-### 2. Create Folder Structure
-
-```bash
-mkdir -p template-${SLUG}/entities/{lists,documents,files}/data \
-         template-${SLUG}/flows/{automations,chat-agents}/data \
-         template-${SLUG}/claude-ws/data
-```
-
----
-
-### 3. Create metadata.json
+### Step 0: Set up context
 
 ```bash
-cat > template-${SLUG}/metadata.json << EOF
-{
-  "name": "${NAME}",
-  "version": "1.0.0",
-  "description": "${DESCRIPTION}",
-  "icon": "📋",
-  "author": "AI Template Generator",
-  "tags": ["template", "workflow"],
-  "requires": {
-    "minAppVersion": "1.0.0",
-    "features": []
-  },
-  "exports": {
-    "lists": 0,
-    "documents": 0,
-    "files": 0,
-    "automations": 0,
-    "chatAgents": 0,
-    "claudeWorkspaces": 0
-  }
-}
-EOF
+# Session file format: sid-{SESSION_ID} at skill root level
+SESSION_ID="${CLAUDE_SESSION_ID:-${SESSION_ID:-123}}"
+SESSION_FILE="$(dirname "$(pwd)")/sid-${SESSION_ID}"
+
+# Validate session file exists
+if [[ ! -f "$SESSION_FILE" ]]; then
+    echo "❌ Error: Session file not found: sid-${SESSION_ID}"
+    echo "   Please run: bash scripts/quick-init.sh <slug> <name> <description>"
+    exit 1
+fi
+
+# Read template path from session file
+export TEMPLATE_DIR=$(cat "$SESSION_FILE")
+cd "$TEMPLATE_DIR"
+
+# Now $TEMPLATE_DIR is set, and you're already in the directory
+# Session file ensures each user/chat gets their own template context
 ```
 
----
-
-### 4. Create Empty Metadata Files
+### Step 1: Update State
 
 ```bash
-echo '{"version": "1.0", "lists": []}' > template-${SLUG}/entities/lists/_lists.json
-echo '{"version": "1.0", "documents": []}' > template-${SLUG}/entities/documents/_documents.json
-echo '{"version": "1.0", "files": {}}' > template-${SLUG}/entities/files/_manifest.json
-echo '{"version": "1.0", "automations": []}' > template-${SLUG}/flows/automations/_automations.json
-echo '{"version": "1.0", "agents": []}' > template-${SLUG}/flows/chat-agents/_agents.json
-echo '{"version": "1.0", "workspaces": []}' > template-${SLUG}/claude-ws/_workspaces.json
+# Update state to mark foundation complete
+python3 scripts/core.py update 1 "foundation" 1
 ```
 
----
-
-### 5. Show Success
+### Step 2: Show Success & STOP
 
 ```
 ✅ Foundation is ready!
 
+📊 We've created:
+• Template structure
+• Metadata files
+• Empty index files
+
 📍 What's next: Lists & Boards
+
    Define what you want to track and how it moves through your workflow.
 
 👉 Continue to set up lists
 ```
 
----
-
-## Data Format References
-
-See `../references/template-structure.md` for complete data structure.
-
-Key files created:
-
-- `metadata.json` - Template information
-- `entities/lists/_lists.json` - Lists tracking file
-- `entities/documents/_documents.json` - Documents tracking file
-- `entities/files/_manifest.json` - Files manifest
-- `flows/automations/_automations.json` - Automations tracking file
-- `flows/chat-agents/_agents.json` - Chat agents tracking file
-- `claude-ws/_workspaces.json` - Workspaces tracking file
-
----
-
-## Return Control
-
-After user says "continue", return to main orchestrator.
-Main orchestrator will load next step: `steps/02-lists.md`
+**⚠️ CRITICAL: STOP HERE!**
+- DO NOT load Step 2 automatically
+- WAIT for user to say "continue", "yes", or "ready"
+- ONLY after user confirms, THEN load: `references/steps/02-lists.md`

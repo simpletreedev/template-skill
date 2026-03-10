@@ -1,69 +1,104 @@
-# Step: STEP 2 - LISTS & BOARDS
+# Step 2: Lists & Boards
 
-## Purpose
+## What We're Creating
 
-Configure lists with custom fields and workflow stages.
+Configure lists with custom fields, workflow stages, and example items to help users get started quickly.
 
----
+## Preview
 
-## What To Do
-
-### 1. Ask About Lists
+Here's the structure we'll create for each list:
 
 ```
-How many lists do you need in this template?
-
-I recommend:
-
-{Show 2-3 relevant options based on their domain}
-
-• Option 1: {Brief description} - {Why it's good}
-
-• Option 2: {Brief description} - {Why it's good}
-
-• Option 3: {Brief description} - {Why it's good}
-
-What works best for you? Or tell me if you have a different setup in mind!
+📋 {List Name}
+├── 🔧 Fields (custom data)
+│   ├── {Field 1} (type)
+│   ├── {Field 2} (type)
+│   └── ...
+├── 🔄 Workflow Stages
+│   {Stage 1} → {Stage 2} → {Stage 3}
+└── 📝 Example Items
+    ├── {Item 1} ({stage})
+    ├── {Item 2} ({stage})
+    └── ...
 ```
 
-**DO NOT proceed to step 2 until you have:**
+Each list helps track different aspects of your workflow.
 
+## Let's Create This
+
+### Step 0: Set up context
+
+```bash
+# Session file format: sid-{SESSION_ID} at skill root level
+SESSION_ID="${CLAUDE_SESSION_ID:-${SESSION_ID:-123}}"
+SESSION_FILE="$(dirname "$(pwd)")/sid-${SESSION_ID}"
+
+# Validate session file exists
+if [[ ! -f "$SESSION_FILE" ]]; then
+    echo "❌ Error: Session file not found: sid-${SESSION_ID}"
+    echo "   Please run: bash scripts/quick-init.sh <slug> <name> <description>"
+    exit 1
+fi
+
+# Read template path from session file
+export TEMPLATE_DIR=$(cat "$SESSION_FILE")
+cd "$TEMPLATE_DIR"
+
+# Now $TEMPLATE_DIR is set, and you're already in the directory
+# Session file ensures each user/chat gets their own template context
+```
+
+### Step 1: Ask About Lists
+
+```
+Perfect! Let's design your lists & boards. 💡
+
+Based on your {domain/industry}, here are some ideas:
+
+{Show 2-3 RELEVANT options based on user's domain}
+
+🎯 For example (if recruitment):
+
+• **Candidates** - Track people through hiring pipeline (Application → Interview → Offer)
+
+• **Open Positions** - Manage job vacancies and requirements
+
+• **Interview Schedule** - Coordinate upcoming interviews
+
+Or if you have something else in mind, just tell me!
+
+**What lists would work best for you?** (You can pick from above or describe your own)
+```
+
+**Gather requirements FIRST:**
 - Exact number of lists
 - Name of EACH list
 
----
-
-### 2. For EACH List, Gather Requirements
-
-**Ask user:**
-
-**CRITICAL: Follow the EXACT format below.**
+### Step 2: For EACH List, Gather Requirements
 
 ```
-Great! Let's set up your **{List Name}**
+Awesome choice! Let's make **{List Name}** perfect for you. 🎯
 
-I need to know:
+Quick questions to set it up:
 
-**1. What information do you want to track?**
+**1. What info matters most?**
 
-   Examples: Title, Priority, Who's assigned, Due date, Status, Tags...
+   Examples: Name, Priority, Assignee, Status, Due date...
 
-**2. What are the steps in your workflow?**
+**2. What's your workflow like?**
 
-   Examples: Backlog → In Progress → Review → Done
+   Examples: New → In Progress → Review → Done
 
-**3. Do you want some example items?**
+**3. Want some example items to get started?**
 
-   These help users understand how to use the template
+   This helps you (and others) understand how to use the list
 
-📝 What would you like to start with? (or say **"you decide"** to let me design the best setup)
+💡 Or just say **"you decide"** and I'll design something great!
 ```
 
 **Gather information FIRST, don't create anything yet.**
 
----
-
-### 3. Show Preview (BEFORE Creating)
+### Step 3: Show Preview (BEFORE Creating)
 
 ```
 Perfect! Here's what I'll create for **{List Name}**:
@@ -76,37 +111,30 @@ Perfect! Here's what I'll create for **{List Name}**:
 
 🔄 Workflow Stages ({count}):
 
-   {Stage 1} → {Stage 2} → {Stage 3} → ...
+   {Stage 1} → {Stage 2} → {Stage 3}
 
-📝 Example Items ({count}):
+📝 Example Items ({count}) to get you started:
 
    • {Item 1} ({stage})
    • {Item 2} ({stage})
-   • ...
 
-This will let you track {what they want to track} through {workflow description}.
+🎯 This setup will help you {benefit - what this achieves}
 
-👉 Ready to create this list? (say **"yes"** to proceed)
+**Sound good?** Just say **"yes"** and I'll create it!
 ```
 
----
+### Step 4: Create List Data File
 
-### 4. Create List Data File
-
-**IMPORTANT: Structure**
-
-- `stages` array: Contains all workflow stages
-- `defaultItems` array (at same level as stages): Contains ALL example items
-- Each item in `defaultItems` must have `stageKey` to reference its stage
-
-For each list, create:
+For each list:
 
 ```bash
 LIST_KEY="{list-key}"
 
-ensure_dir "template-${SLUG}/entities/lists/data/${LIST_KEY}"
+# Create directory
+mkdir -p "${TEMPLATE_DIR}/entities/lists/data/${LIST_KEY}"
 
-cat > template-${SLUG}/entities/lists/data/${LIST_KEY}/data.json << 'EOF'
+# Create data.json
+cat > "${TEMPLATE_DIR}/entities/lists/data/${LIST_KEY}/data.json" << 'EOF'
 {
   "key": "list-${LIST_KEY}",
   "aliasKey": "{3-letter alias}",
@@ -150,144 +178,51 @@ cat > template-${SLUG}/entities/lists/data/${LIST_KEY}/data.json << 'EOF'
 EOF
 ```
 
-**Field Types (for AI reference):**
-
-- `TEXT` - Short text (like a title)
-- `TEXTAREA` - Long text (like a description)
-- `SELECT` - Dropdown choices (needs options)
+**Field Types:**
+- `TEXT` - Short text (title)
+- `TEXTAREA` - Long text (description)
+- `SELECT` - Dropdown (needs options)
 - `DATE` - Date picker
-- `DATE_TIME` - Date + time picker
+- `DATE_TIME` - Date + time
 - `NUMBER` - Numeric value
 - `CHECKBOX` - Yes/No toggle
 - `USER` - Person assignment
 - `FILE` - File attachment
 
-**Example with items:**
-
-```json
-{
-  "key": "candidates",
-  "name": "Candidates",
-  "fieldDefinitions": [
-    {
-      "key": "name",
-      "name": "Name",
-      "type": "TEXT",
-      "required": true,
-      "order": 0
-    },
-    { "key": "position", "name": "Position", "type": "TEXT", "order": 1 }
-  ],
-  "stages": [
-    { "key": "cv_review", "name": "CV Review", "order": 0, "color": "#6B7280" },
-    { "key": "interview", "name": "Interview", "order": 1, "color": "#3B82F6" }
-  ],
-  "defaultItems": [
-    {
-      "key": "candidate_1",
-      "name": "John Doe",
-      "stageKey": "cv_review",
-      "customFields": [
-        { "fieldKey": "position", "value": "Frontend Developer" }
-      ]
-    },
-    {
-      "key": "candidate_2",
-      "name": "Jane Smith",
-      "stageKey": "interview",
-      "customFields": [{ "fieldKey": "position", "value": "Backend Developer" }]
-    }
-  ]
-}
-```
-
----
-
-### 5. Update \_lists.json
+### Step 5: Update _lists.json
 
 ```bash
 LIST_KEY="{list-key}"
 
-add_to_index "${SLUG}" "entities/lists/_lists.json" "list-${LIST_KEY}" "{List Name}" "{List Description}" "data/list-${LIST_KEY}/data.json"
+# Read existing index
+INDEX_FILE="${TEMPLATE_DIR}/entities/lists/_lists.json"
+INDEX=$(cat "$INDEX_FILE")
+
+# Add new list entry using python
+python3 << PYTHON
+import json
+index = $INDEX
+index['lists'].append({
+    "key": "list-${LIST_KEY}",
+    "name": "{List Name}",
+    "description": "{List Description}",
+    "dataPath": "data/list-${LIST_KEY}/data.json"
+})
+with open('$INDEX_FILE', 'w') as f:
+    json.dump(index, f, indent=2)
+PYTHON
 ```
 
----
-
-### 6. Show Success & Ask About Automations
-
-**After EACH list is created:**
-
-```
-✅ **{List Name}** created!
-
-Would you like to add **automations** to this list?
-
-Automations can:
-
-🔔 Send notifications when items are created/updated
-📧 Send emails when items move to specific stages
-✅ Auto-assign tasks based on conditions
-📋 Create follow-up items automatically
-🔄 Move items between stages automatically
-
-What would you like?
-
-• Add automations? (say "continue" or describe what you want)
-• Skip for now (say "skip")
-```
-
-If user says "continue":
+### Step 6: After Completion
 
 ```bash
-cat references/steps/02b-automation-lists.md
+# Count lists
+LIST_COUNT=$(python3 -c "import json; print(len(json.load(open('${TEMPLATE_DIR}/entities/lists/_lists.json'))['lists']))")
+
+# Update state
+python3 scripts/core.py update 2 "lists" ${LIST_COUNT}
 ```
 
----
+## ✅ Lists Ready!
 
-### 7. After Completion
-
-```bash
-LIST_COUNT=$(get_count "${SLUG}" "entities/lists/_lists.json" "lists")
-update_state 2 "lists" ${LIST_COUNT}
-```
-
-**Show completion prompt:**
-
-```
-✅ Awesome! Your lists are all set up.
-
-📊 We've created:
-
-   • {count} lists: {list names}
-   • {total_fields} custom fields
-   • {total_stages} workflow stages
-   • {total_items} example items
-
-📍 What's next: Documents (optional)
-   Great for guides, meeting notes, process docs.
-
-👉 Continue to add documents
-⏭️ Skip documents
-```
-
----
-
-## Data Format References
-
-See `../references/template-structure.md` for complete list data structure.
-
-**Key points:**
-
-- `stages` array: All workflow stages
-- `defaultItems` array: All example items (same level as stages)
-- Each item needs `stageKey` to identify which stage it belongs to
-- `customFields` array: Key-value pairs for field definitions
-
----
-
-## Return Control
-
-After user says "continue", return to main orchestrator.
-Main orchestrator will load next step: `steps/03-documents.md`
-
-If user says "skip", mark this step as `skipped` and proceed to next step.
+**See `INDEX.md` for response template.**
